@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Login - Grocery Store</title>
+
+  <link
+    rel="stylesheet"
+    href="/src/style.css"
+  >
+</head>
+
+<body>
+
+  <div class="thank-you-page">
+
+    <div class="thank-you-card">
+
+      <div class="success-icon">
+        🔐
+      </div>
+
+      <h1>Welcome Back</h1>
+
+      <p class="thank-you-message">
+        Login to continue shopping.
+      </p>
+
+      <form id="login-form">
+
+        <div class="form-group">
+
+          <label for="login-email">
+            Email
+          </label>
+
+          <input
+            type="email"
+            id="login-email"
+            placeholder="Enter your email"
+            required
+          >
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="login-password">
+            Password
+          </label>
+
+          <div class="password-wrapper">
+
+  <input
+    type="password"
+    id="login-password"
+    placeholder="Enter your password"
+    required
+  >
+
+  <button
+    type="button"
+    id="toggle-login-password"
+    class="password-toggle"
+  >
+    👁️
+  </button>
+
+</div>
+
+        </div>
+
+        <button
+          type="submit"
+          id="login-button"
+        >
+          Login
+        </button>
+
+      </form>
+
+      <p style="margin-top: 18px;">
+        Don't have an account?
+        <a href="/register.html">
+          Create Account
+        </a>
+      </p>
+
+      <a
+        href="/"
+        class="continue-shopping"
+      >
+        ← Back to Store
+      </a>
+
+    </div>
+
+  </div>
+
+  <script
+    type="module"
+    src="/src/login.ts"
+  ></script>
+
+</body>
+
+</html>

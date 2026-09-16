@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Admin Orders - Grocery Store</title>
+
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+
+<body>
+
+  <div class="checkout-page">
+
+    <header class="checkout-header">
+
+      <h1>🛠️ Admin Orders</h1>
+
+      <a
+        href="/"
+        class="back-to-cart"
+      >
+        ← Back to Store
+      </a>
+
+    </header>
+
+
+    <main class="checkout-container">
+
+      <!-- Order Management -->
+
+      <section class="customer-details">
+
+        <h2>Order Management</h2>
+
+        <p>
+          View and manage all customer orders.
+        </p>
+
+        <button id="refresh-orders-button">
+          🔄 Refresh Orders
+        </button>
+      <div class="admin-quick-guide">
+  <h3>📋 Quick Admin Guide</h3>
+
+  <div class="quick-guide-item">
+    <strong>1. 🔄 Refresh Orders</strong>
+    <span>Latest customer orders check karein.</span>
+  </div>
+
+  <div class="quick-guide-item">
+    <strong>2. 🔍 Search Orders</strong>
+    <span>Order number, customer ya phone se search karein.</span>
+  </div>
+
+  <div class="quick-guide-item">
+    <strong>3. 📦 Update Status</strong>
+    <span>Order ko Processing, Shipped ya Delivered karein.</span>
+  </div>
+
+  <div class="quick-guide-item">
+    <strong>4. 👁️ View Details</strong>
+    <span>Customer aur order ki complete information dekhein.</span>
+  </div>
+</div>
+      </section>
+
+
+      <!-- All Orders -->
+
+      <section class="checkout-summary">
+
+        <h2>All Orders</h2>
+
+
+        <!-- Search and Filter -->
+
+        <div class="admin-order-filters">
+
+          <input
+            type="text"
+            id="order-search"
+            placeholder="🔍 Search order, customer or phone..."
+          >
+
+          <select id="status-filter">
+
+            <option value="all">
+              All Statuses
+            </option>
+
+            <option value="Pending">
+              Pending
+            </option>
+
+            <option value="Processing">
+              Processing
+            </option>
+
+            <option value="Shipped">
+              Shipped
+            </option>
+
+            <option value="Out for Delivery">
+              Out for Delivery
+            </option>
+
+            <option value="Delivered">
+              Delivered
+            </option>
+
+            <option value="Cancelled">
+              Cancelled
+            </option>
+
+          </select>
+
+          <button id="clear-filters-button">
+            Clear
+          </button>
+
+        </div>
+
+
+        <!-- Order Summary Cards -->
+
+        <div class="admin-summary">
+
+          <div class="summary-card">
+            <h3>Total Orders</h3>
+            <strong id="total-orders">0</strong>
+          </div>
+
+          <div class="summary-card">
+            <h3>Pending</h3>
+            <strong id="pending-orders">0</strong>
+          </div>
+
+          <div class="summary-card">
+            <h3>Processing</h3>
+            <strong id="processing-orders">0</strong>
+          </div>
+
+          <div class="summary-card">
+            <h3>Shipped</h3>
+            <strong id="shipped-orders">0</strong>
+          </div>
+
+          <div class="summary-card">
+            <h3>Out for Delivery</h3>
+            <strong id="out-for-delivery-orders">0</strong>
+          </div>
+
+          <div class="summary-card">
+            <h3>Delivered</h3>
+            <strong id="delivered-orders">0</strong>
+          </div>
+
+          <div class="summary-card">
+            <h3>Cancelled</h3>
+            <strong id="cancelled-orders">0</strong>
+          </div>
+<div class="summary-card">
+  <h3>Total Sales</h3>
+  <strong id="total-sales">Rs. 0</strong>
+</div>
+        </div>
+
+
+        <!-- Orders List -->
+
+        <div id="admin-orders-list">
+
+          <p>
+            Loading orders...
+          </p>
+
+        </div>
+
+      </section>
+    <!-- Product Management -->
+
+<section class="customer-details">
+
+  <h2>🛍️ Product Management</h2>
+
+  <p>
+    Add and manage grocery store products.
+  </p>
+
+  <div class="product-admin-form">
+
+    <div class="admin-form-row">
+
+      <div class="admin-form-group">
+        <label for="product-name">
+          Product Name
+        </label>
+
+        <input
+          type="text"
+          id="product-name"
+          placeholder="e.g. Fresh Apples"
+        >
+      </div>
+
+
+      <div class="admin-form-group">
+        <label for="product-price">
+          Price
+        </label>
+
+        <input
+          type="number"
+          id="product-price"
+          placeholder="e.g. 250"
+          min="0"
+        >
+      </div>
+
+    </div>
+
+
+    <div class="admin-form-row">
+
+      <div class="admin-form-group">
+        <label for="product-category">
+          Category
+        </label>
+
+        <select id="product-category">
+
+          <option value="Fruits">
+            Fruits
+          </option>
+
+          <option value="Vegetables">
+            Vegetables
+          </option>
+
+          <option value="Dairy">
+            Dairy
+          </option>
+
+          <option value="Bakery">
+            Bakery
+          </option>
+
+        </select>
+      </div>
+
+
+      <div class="admin-form-group">
+        <label for="product-unit">
+          Unit
+        </label>
+
+        <select id="product-unit">
+
+          <option value="/ kg">
+            / kg
+          </option>
+
+          <option value="/ dozen">
+            / dozen
+          </option>
+
+          <option value="/ litre">
+            / litre
+          </option>
+
+          <option value="/ box">
+            / box
+          </option>
+
+          <option value="">
+            No Unit
+          </option>
+
+        </select>
+      </div>
+
+    </div>
+
+
+    <div class="admin-form-row">
+
+      <div class="admin-form-group">
+
+        <label for="product-image">
+          Image
+        </label>
+
+        <input
+  type="file"
+  id="product-image"
+  accept="image/png,image/jpeg,image/webp"
+>
+
+      </div>
+
+
+      <div class="admin-form-group">
+
+        <label for="product-stock">
+          Stock
+        </label>
+
+        <input
+          type="number"
+          id="product-stock"
+          placeholder="e.g. 100"
+          min="0"
+          value="100"
+        >
+
+      </div>
+
+    </div>
+
+
+    <button
+      id="add-product-button"
+      type="button"
+    >
+      ➕ Add Product
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- Products List -->
+
+<section class="checkout-summary">
+
+  <h2>📦 Existing Products</h2>
+
+  <div id="admin-products-list">
+
+    <p>
+      Loading products...
+    </p>
+
+  </div>
+
+</section>
+    </main>
+
+  </div>
+
+
+  <script
+    type="module"
+    src="/src/admin-orders.ts"
+  ></script>
+  <script
+  type="module"
+  src="/src/admin-products.ts"
+></script>
+
+  <!-- Order Details Modal -->
+
+  <div
+    id="order-details-modal"
+    class="order-modal"
+  >
+
+    <div class="order-modal-content">
+
+      <button
+        id="close-order-modal"
+        class="close-order-modal"
+      >
+        ×
+      </button>
+
+      <h2>Order Details</h2>
+
+      <div id="order-details-content">
+        <!-- Order details will appear here -->
+      </div>
+
+    </div>
+
+  </div>
+ <!-- Edit Product Modal -->
+
+<div id="edit-product-modal" class="modal">
+
+  <div class="modal-content">
+
+    <span id="close-edit-product-modal" class="close-modal">
+      &times;
+    </span>
+
+    <h2>✏️ Edit Product</h2>
+
+    <div class="admin-form-group">
+
+      <label for="edit-product-name">
+        Product Name
+      </label>
+
+      <input
+        type="text"
+        id="edit-product-name"
+        placeholder="Product name"
+      >
+
+    </div>
+
+
+    <div class="admin-form-group">
+
+      <label for="edit-product-price">
+        Price
+      </label>
+
+      <input
+        type="number"
+        id="edit-product-price"
+        min="0"
+        placeholder="Price"
+      >
+
+    </div>
+
+
+    <div class="admin-form-group">
+
+      <label for="edit-product-category">
+        Category
+      </label>
+
+      <select id="edit-product-category">
+
+        <option value="Fruits">Fruits</option>
+        <option value="Vegetables">Vegetables</option>
+        <option value="Dairy">Dairy</option>
+        <option value="Bakery">Bakery</option>
+
+      </select>
+
+    </div>
+
+
+    <div class="admin-form-group">
+
+      <label for="edit-product-unit">
+        Unit
+      </label>
+
+      <select id="edit-product-unit">
+
+        <option value="/ kg">/ kg</option>
+        <option value="/ dozen">/ dozen</option>
+        <option value="/ litre">/ litre</option>
+        <option value="/ box">/ box</option>
+        <option value="">No Unit</option>
+
+      </select>
+
+    </div>
+
+
+    <div class="admin-form-group">
+
+      <label for="edit-product-image">
+        Image
+      </label>
+
+      <input
+  type="file"
+  id="edit-product-image"
+  accept="image/png,image/jpeg,image/webp"
+>
+
+    </div>
+
+
+    <div class="admin-form-group">
+
+      <label for="edit-product-stock">
+        Stock
+      </label>
+
+      <input
+        type="number"
+        id="edit-product-stock"
+        min="0"
+        placeholder="Stock"
+      >
+
+    </div>
+
+
+    <button
+      id="save-edit-product-button"
+      type="button"
+    >
+      💾 Save Changes
+    </button>
+
+  </div>
+
+</div>
+</body>
+
+</html>

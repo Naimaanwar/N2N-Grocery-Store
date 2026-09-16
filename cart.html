@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grocery Store - Cart</title>
+  <link
+  rel="stylesheet"
+  href="/src/style.css"
+>
+</head>
+
+<body>
+
+  <div class="cart-page">
+
+    <h1>🛒 Your Shopping Cart</h1>
+
+    <div id="cart-items"></div>
+
+    <div class="cart-summary">
+
+      <h3>Subtotal: <span id="subtotal">Rs. 0</span></h3>
+
+      <h3>Delivery: <span id="delivery">Rs. 0</span></h3>
+
+      <h2>Total: <span id="total">Rs. 0</span></h2>
+
+      <button id="continue-shopping">
+        Continue Shopping
+      </button>
+
+      <button id="checkout-button">
+        Proceed to Checkout
+      </button>
+
+    </div>
+
+  </div>
+
+  <script type="module" src="/src/cart.ts"></script>
+
+</body>
+</html>

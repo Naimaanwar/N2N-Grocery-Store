@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>My Orders - Grocery Store</title>
+
+  <link
+    rel="stylesheet"
+    href="/src/style.css"
+  >
+</head>
+
+<body>
+
+  <div class="thank-you-page">
+
+    <div class="thank-you-card">
+
+      <div class="success-icon">
+        📦
+      </div>
+
+      <h1>My Orders</h1>
+
+      <p class="thank-you-message">
+        View your previous orders and track their status.
+      </p>
+
+      <div class="my-orders-filters">
+
+  <input
+    type="text"
+    id="my-order-search"
+    placeholder="🔍 Search by order number..."
+  >
+
+  <select id="my-order-status-filter">
+
+    <option value="all">
+      📦 All Orders
+    </option>
+
+    <option value="Pending">
+      📋 Pending
+    </option>
+
+    <option value="Processing">
+      ⚙️ Processing
+    </option>
+
+    <option value="Shipped">
+      🚚 Shipped
+    </option>
+
+    <option value="Out for Delivery">
+      🛵 Out for Delivery
+    </option>
+
+    <option value="Delivered">
+      ✅ Delivered
+    </option>
+
+    <option value="Cancelled">
+      ❌ Cancelled
+    </option>
+    <button
+  type="button"
+  id="clear-my-order-filters"
+>
+  🧹 Clear Filters
+</button>
+  </select>
+
+</div>
+
+<div id="my-order-notification"></div>
+
+<div id="my-orders-list">
+  <p>Loading orders...</p>
+</div>
+    <div
+  id="my-order-modal"
+  class="my-order-modal"
+>
+  <div class="my-order-modal-content">
+
+    <button
+      id="close-my-order-modal"
+      class="close-my-order-modal"
+    >
+      ×
+    </button>
+
+    <h2>📦 Order Details</h2>
+
+    <div id="my-order-details-content">
+    </div>
+
+  </div>
+</div>
+      <a
+        href="/"
+        class="continue-shopping"
+      >
+        ← Back to Store
+      </a>
+
+    </div>
+
+  </div>
+
+  <script
+    type="module"
+    src="/src/my-orders.ts"
+  ></script>
+
+</body>
+
+</html>

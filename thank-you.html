@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+
+>
+
+  <title>Order Confirmed - Grocery Store</title>
+
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+
+<body>
+
+  <div class="thank-you-page">
+
+```
+<div class="thank-you-card">
+
+  <div class="success-icon">
+    ✓
+  </div>
+
+  <h1>Order Confirmed!</h1>
+
+  <p class="thank-you-message">
+    Thank you for your order.
+    Your grocery order has been received successfully.
+  </p>
+
+  <div class="order-number">
+
+    <span>Order Number</span>
+
+    <strong id="order-number">
+      Loading...
+    </strong>
+
+  </div>
+
+  <div class="order-status">
+
+    <span>Order Status</span>
+
+    <strong id="order-status">
+      📦 Processing
+    </strong>
+
+  </div>
+
+  <div class="order-details">
+
+  <h2>Order Details</h2>
+
+  <p>
+    👤 <strong>Customer:</strong>
+    <span id="customer-name">Loading...</span>
+  </p>
+
+  <p>
+    📱 <strong>Phone:</strong>
+    <span id="customer-phone">Loading...</span>
+  </p>
+
+  <p>
+    📍 <strong>Address:</strong>
+    <span id="customer-address">Loading...</span>
+  </p>
+
+  <p>
+    🏙️ <strong>City:</strong>
+    <span id="customer-city">Loading...</span>
+  </p>
+
+  <p>
+    💳 <strong>Payment:</strong>
+    <span id="payment-method">Loading...</span>
+  </p>
+
+  <p>
+    💰 <strong>Total:</strong>
+    <span id="order-total">Loading...</span>
+  </p>
+
+</div>
+
+<div class="thank-you-info">
+
+  <p>
+    📦 Your order is being prepared.
+  </p>
+
+  <p>
+    🚚 We will deliver your order to your address.
+  </p>
+
+</div>
+
+
+  <a
+    href="/"
+    class="continue-shopping"
+  >
+    Continue Shopping
+  </a>
+
+</div>
+```
+
+  </div>
+
+  <script
+    type="module"
+    src="/src/thank-you.ts"
+  ></script>
+
+</body>
+
+</html>

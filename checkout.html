@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Checkout - Grocery Store</title>
+
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+
+<body>
+
+  <div class="checkout-page">
+
+```
+<header class="checkout-header">
+
+  <h1>📦 Checkout</h1>
+
+  <a href="/cart.html" class="back-to-cart">
+    ← Back to Cart
+  </a>
+
+</header>
+
+<main class="checkout-container">
+
+  <section class="customer-details">
+
+    <h2>Customer Details</h2>
+
+    <div class="form-group">
+      <label for="customer-name">Full Name</label>
+
+      <input
+        type="text"
+        id="customer-name"
+        placeholder="Enter your full name"
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="customer-phone">Mobile Number</label>
+
+      <input
+        type="tel"
+        id="customer-phone"
+        placeholder="03XX-XXXXXXX"
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="customer-address">Delivery Address</label>
+
+      <textarea
+        id="customer-address"
+        placeholder="Enter your complete delivery address"
+        rows="4"
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="customer-city">City</label>
+
+      <input
+        type="text"
+        id="customer-city"
+        placeholder="Enter your city"
+      >
+    </div>
+
+    <h2>Payment Method</h2>
+
+    <div class="payment-options">
+
+      <label class="payment-option">
+        <input
+          type="radio"
+          name="payment"
+          value="cod"
+          checked
+        >
+
+        <span>💵 Cash on Delivery</span>
+      </label>
+
+      <label class="payment-option">
+        <input
+          type="radio"
+          name="payment"
+          value="online"
+        >
+
+        <span>💳 Online Payment</span>
+      </label>
+
+    </div>
+
+  </section>
+
+  <section class="checkout-summary">
+
+    <h2>Order Summary</h2>
+
+    <div id="checkout-items">
+      <!-- Products will appear here -->
+    </div>
+
+    <hr>
+
+    <div class="checkout-row">
+      <span>Subtotal</span>
+
+      <strong id="checkout-subtotal">
+        Rs. 0
+      </strong>
+    </div>
+
+    <div class="checkout-row">
+      <span>Delivery</span>
+
+      <strong id="checkout-delivery">
+        Rs. 100
+      </strong>
+    </div>
+
+    <div class="checkout-total">
+      <span>Total</span>
+
+      <strong id="checkout-total">
+        Rs. 100
+      </strong>
+    </div>
+
+    <button id="place-order-button">
+      Place Order
+    </button>
+
+  </section>
+
+</main>
+```
+
+  </div>
+
+  <script type="module" src="/src/checkout.ts"></script>
+
+</body>
+</html>

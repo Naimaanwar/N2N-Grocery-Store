@@ -1,0 +1,16 @@
+node_modules/
+dist/
+
+.env
+.env.*
+!.env.example
+
+.wwebjs_auth/
+.wwebjs_cache/
+
+server/.wwebjs_auth/
+server/.wwebjs_cache/
+server/.wwebjs_auth_old/
+public/product-images/
+
+*.log
