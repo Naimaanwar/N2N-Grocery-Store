@@ -1,44 +1,48 @@
 const isLoggedIn =
-  localStorage.getItem('groceryLoggedIn')
+localStorage.getItem('groceryLoggedIn')
 
 if (isLoggedIn !== 'true') {
-  localStorage.setItem(
-    'loginReturnUrl',
-    window.location.pathname + window.location.search
-  )
+localStorage.setItem(
+'loginReturnUrl',
+window.location.pathname + window.location.search
+)
 
-  window.location.href = '/login.html'
+window.location.href = '/login.html'
 }
+
 const productNames: Record<string, string> = {
-  apple: 'Fresh Apples',
-  banana: 'Fresh Banana',
-  mango: 'Fresh Mango',
-  guava: 'Fresh Guava',
-  strawberry: 'Fresh Strawberry',
-  milk: 'Fresh Milk',
-  bread: 'Brown Bread'
+apple: 'Fresh Apples',
+banana: 'Fresh Banana',
+mango: 'Fresh Mango',
+guava: 'Fresh Guava',
+strawberry: 'Fresh Strawberry',
+milk: 'Fresh Milk',
+bread: 'Brown Bread'
 }
 
 const productPrices: Record<string, number> = {
-  apple: 250,
-  banana: 180,
-  mango: 300,
-  guava: 220,
-  strawberry: 450,
-  milk: 220,
-  bread: 180
+apple: 250,
+banana: 180,
+mango: 300,
+guava: 220,
+strawberry: 450,
+milk: 220,
+bread: 180
 }
 
-const orderInput = document.querySelector(
-  '#tracking-order-number'
+const orderInput =
+document.querySelector(
+'#tracking-order-number'
 ) as HTMLInputElement
 
-const trackButton = document.querySelector(
-  '#track-order-button'
+const trackButton =
+document.querySelector(
+'#track-order-button'
 ) as HTMLButtonElement
 
-const trackingResult = document.querySelector(
-  '#tracking-result'
+const trackingResult =
+document.querySelector(
+'#tracking-result'
 ) as HTMLDivElement
 
 let trackedOrderNumber = ''
@@ -46,562 +50,565 @@ let lastTrackedStatus = ''
 let lastTrackedUpdated: string | number = ''
 
 trackButton.addEventListener(
-  'click',
-  async function () {
+'click',
+async function () {
 
-    const orderNumber =
-      orderInput.value.trim()
+const orderNumber =
+  orderInput.value.trim()
 
-    if (orderNumber === '') {
-      alert(
-        'Please enter your order number.'
-      )
-      return
-    }
+if (orderNumber === '') {
+  alert(
+    'Please enter your order number.'
+  )
+  return
+}
+
+trackingResult.innerHTML =
+  '<p>🔄 Checking your order...</p>'
+
+try {
+
+  const url =
+    `${import.meta.env.VITE_API_URL}/api/orders/` +
+    encodeURIComponent(orderNumber)
+
+  const response =
+    await fetch(url)
+
+  const result =
+    await response.json()
+
+  if (
+    !response.ok ||
+    !result.success
+  ) {
 
     trackingResult.innerHTML =
-      '<p>🔄 Checking your order...</p>'
+      '<div class="empty-cart">' +
+      '<h3>❌ Order Not Found</h3>' +
+      '<p>Please check your order number and try again.</p>' +
+      '</div>'
 
-    try {
+    return
+  }
 
-      const url =
-        'http://localhost:5000/api/orders/' +
-        encodeURIComponent(orderNumber)
+  const order =
+    result.order
 
-      const response =
-        await fetch(url)
+  trackedOrderNumber =
+    order.orderNumber || orderNumber
 
-      const result =
-        await response.json()
+  lastTrackedStatus =
+    order.status || 'Pending'
 
-      if (
-        !response.ok ||
-        !result.success
-      ) {
+  lastTrackedUpdated =
+    order.lastUpdated || ''
 
-        trackingResult.innerHTML =
-          '<div class="empty-cart">' +
-          '<h3>❌ Order Not Found</h3>' +
-          '<p>Please check your order number and try again.</p>' +
-          '</div>'
+  const orderNumberText =
+    order.orderNumber ||
+    orderNumber
 
-        return
-      }
+  const customerName =
+    order.name ||
+    'Not available'
 
-      const order =
-        result.order
+  const phone =
+    order.phone ||
+    'Not available'
 
-      trackedOrderNumber =
-        order.orderNumber || orderNumber
+  const address =
+    order.address ||
+    'Not available'
 
-      lastTrackedStatus =
-        order.status || 'Pending'
+  const city =
+    order.city ||
+    'Not available'
 
-      lastTrackedUpdated =
-        order.lastUpdated || ''
+  const payment =
+    order.paymentMethod ||
+    'Not available'
 
-      const orderNumberText =
-        order.orderNumber ||
-        orderNumber
+  const total =
+    order.total || 0
 
-      const customerName =
-        order.name ||
-        'Not available'
+  const status =
+    order.status ||
+    'Pending'
 
-      const phone =
-        order.phone ||
-        'Not available'
+  let statusMessage = ''
 
-      const address =
-        order.address ||
-        'Not available'
+  if (status === 'Pending') {
+    statusMessage =
+      '🟡 Your order has been received and is waiting for processing.'
+  } else if (status === 'Processing') {
+    statusMessage =
+      '🔵 Your order is currently being prepared.'
+  } else if (status === 'Shipped') {
+    statusMessage =
+      '🚚 Your order has been shipped and is on the way.'
+  } else if (status === 'Out for Delivery') {
+    statusMessage =
+      '🏠 Your order is out for delivery and will arrive soon.'
+  } else if (status === 'Delivered') {
+    statusMessage =
+      '✅ Your order has been successfully delivered.'
+  } else if (status === 'Cancelled') {
+    statusMessage =
+      '❌ This order has been cancelled.'
+  }
 
-      const city =
-        order.city ||
-        'Not available'
+  let pendingClass = ''
+  let processingClass = ''
+  let shippedClass = ''
+  let deliveryClass = ''
+  let deliveredClass = ''
 
-      const payment =
-        order.paymentMethod ||
-        'Not available'
+  if (status === 'Pending') {
 
-      const total =
-        order.total || 0
+    pendingClass = 'active'
 
-      const status =
-        order.status ||
-        'Pending'
+  } else if (status === 'Processing') {
 
-      let statusMessage = ''
+    pendingClass = 'completed'
+    processingClass = 'active'
 
-      if (status === 'Pending') {
-        statusMessage =
-          '🟡 Your order has been received and is waiting for processing.'
-      }
+  } else if (status === 'Shipped') {
 
-      if (status === 'Processing') {
-        statusMessage =
-          '🔵 Your order is currently being prepared.'
-      }
+    pendingClass = 'completed'
+    processingClass = 'completed'
+    shippedClass = 'active'
 
-      if (status === 'Shipped') {
-        statusMessage =
-          '🚚 Your order has been shipped and is on the way.'
-      }
+  } else if (status === 'Out for Delivery') {
 
-      if (status === 'Out for Delivery') {
-        statusMessage =
-          '🏠 Your order is out for delivery and will arrive soon.'
-      }
+    pendingClass = 'completed'
+    processingClass = 'completed'
+    shippedClass = 'completed'
+    deliveryClass = 'active'
 
-      if (status === 'Delivered') {
-        statusMessage =
-          '✅ Your order has been successfully delivered.'
-      }
+  } else if (status === 'Delivered') {
 
-      if (status === 'Cancelled') {
-        statusMessage =
-          '❌ This order has been cancelled.'
-      }
+    pendingClass = 'completed'
+    processingClass = 'completed'
+    shippedClass = 'completed'
+    deliveryClass = 'completed'
+    deliveredClass = 'active'
+  }
 
-      let pendingClass = ''
-      let processingClass = ''
-      let shippedClass = ''
-      let deliveryClass = ''
-      let deliveredClass = ''
+  let paymentText =
+    payment
 
-      if (status === 'Pending') {
-        pendingClass = 'active'
-      }
+  if (payment === 'cod') {
 
-      if (status === 'Processing') {
-        pendingClass = 'completed'
-        processingClass = 'active'
-      }
+    paymentText =
+      '💵 Cash on Delivery'
 
-      if (status === 'Shipped') {
-        pendingClass = 'completed'
-        processingClass = 'completed'
-        shippedClass = 'active'
-      }
+  } else if (payment === 'online') {
 
-      if (status === 'Out for Delivery') {
-        pendingClass = 'completed'
-        processingClass = 'completed'
-        shippedClass = 'completed'
-        deliveryClass = 'active'
-      }
+    paymentText =
+      '💳 Online Payment'
+  }
 
-      if (status === 'Delivered') {
-        pendingClass = 'completed'
-        processingClass = 'completed'
-        shippedClass = 'completed'
-        deliveryClass = 'completed'
-        deliveredClass = 'active'
-      }
+  let productsHTML =
+    '<p>No product details available.</p>'
 
-      let paymentText =
-        payment
+  if (
+    Array.isArray(order.items) &&
+    order.items.length > 0
+  ) {
 
-      if (payment === 'cod') {
-        paymentText =
-          '💵 Cash on Delivery'
-      }
+    productsHTML =
+      '<div class="tracking-products">'
 
-      if (payment === 'online') {
-        paymentText =
-          '💳 Online Payment'
-      }
+    order.items.forEach(
+      function (item: any) {
 
-      let productsHTML =
-        '<p>No product details available.</p>'
+        const productName =
+          productNames[item.id] ||
+          item.id
 
-      if (
-        Array.isArray(order.items) &&
-        order.items.length > 0
-      ) {
+        const productPrice =
+          productPrices[item.id] ||
+          0
 
-        productsHTML =
-          '<div class="tracking-products">'
+        const quantity =
+          Number(item.quantity) || 0
 
-        order.items.forEach(
-          function (item: any) {
-
-            const productName =
-              productNames[item.id] ||
-              item.id
-
-            const productPrice =
-              productPrices[item.id] ||
-              0
-
-            const quantity =
-              Number(item.quantity) || 0
-
-            const itemTotal =
-              productPrice * quantity
-
-            productsHTML +=
-              '<div class="tracking-product">' +
-
-              '<strong>' +
-              productName +
-              '</strong>' +
-
-              '<span>' +
-              'Price: Rs. ' +
-              productPrice +
-              '</span>' +
-
-              '<span>' +
-              'Quantity: ' +
-              quantity +
-              '</span>' +
-
-              '<span>' +
-              'Item Total: Rs. ' +
-              itemTotal +
-              '</span>' +
-
-              '</div>'
-          }
-        )
+        const itemTotal =
+          productPrice * quantity
 
         productsHTML +=
+          '<div class="tracking-product">' +
+
+          '<strong>' +
+          productName +
+          '</strong>' +
+
+          '<span>' +
+          'Price: Rs. ' +
+          productPrice +
+          '</span>' +
+
+          '<span>' +
+          'Quantity: ' +
+          quantity +
+          '</span>' +
+
+          '<span>' +
+          'Item Total: Rs. ' +
+          itemTotal +
+          '</span>' +
+
           '</div>'
       }
+    )
 
-      if (status === 'Cancelled') {
-
-        trackingResult.innerHTML =
-          '<div class="order-tracking-result">' +
-
-          '<h2>Order Found ✅</h2>' +
-
-          '<p>' +
-          '<strong>Order Number:</strong> #' +
-          orderNumberText +
-          '</p>' +
-
-          '<p>' +
-          '<strong>Customer:</strong> ' +
-          customerName +
-          '</p>' +
-
-          '<p>' +
-          '<strong>Phone:</strong> ' +
-          phone +
-          '</p>' +
-
-          '<p>' +
-          '<strong>Address:</strong> ' +
-          address +
-          '</p>' +
-
-          '<p>' +
-          '<strong>City:</strong> ' +
-          city +
-          '</p>' +
-
-          '<p>' +
-          '<strong>Payment:</strong> ' +
-          paymentText +
-          '</p>' +
-
-          '<p>' +
-          '<strong>Total:</strong> Rs. ' +
-          total +
-          '</p>' +
-
-          '<p>' +
-          '<strong>Delivery:</strong> Rs. 100' +
-          '</p>' +
-
-          '<p>' +
-          '<strong>Last Updated:</strong> ' +
-          '<span id="tracking-last-updated">' +
-          (
-            order.lastUpdated
-              ? new Date(order.lastUpdated).toLocaleString()
-              : 'Not available'
-          ) +
-          '</span>' +
-          '</p>' +
-
-          '<p>' +
-          '<strong>Current Status:</strong> ' +
-          '<span id="tracking-current-status">' +
-          '❌ ' +
-          status +
-          '</span>' +
-          '</p>' +
-
-          '<p id="tracking-status-message" class="tracking-status-message">' +
-          statusMessage +
-          '</p>' +
-
-          '</div>'
-
-        return
-      }
-
-      trackingResult.innerHTML =
-        '<div class="order-tracking-result">' +
-
-        '<h2>Order Found ✅</h2>' +
-
-        '<p>' +
-        '<strong>Order Number:</strong> #' +
-        orderNumberText +
-        '</p>' +
-
-        '<p>' +
-        '<strong>Customer:</strong> ' +
-        customerName +
-        '</p>' +
-
-        '<p>' +
-        '<strong>Phone:</strong> ' +
-        phone +
-        '</p>' +
-
-        '<p>' +
-        '<strong>Address:</strong> ' +
-        address +
-        '</p>' +
-
-        '<p>' +
-        '<strong>City:</strong> ' +
-        city +
-        '</p>' +
-
-        '<p>' +
-        '<strong>Payment:</strong> ' +
-        paymentText +
-        '</p>' +
-
-        '<p>' +
-        '<strong>Total:</strong> Rs. ' +
-        total +
-        '</p>' +
-
-        '<p>' +
-        '<strong>Delivery:</strong> Rs. 100' +
-        '</p>' +
-
-        '<p>' +
-        '<strong>Last Updated:</strong> ' +
-        '<span id="tracking-last-updated">' +
-        (
-          order.lastUpdated
-            ? new Date(order.lastUpdated).toLocaleString()
-            : 'Not available'
-        ) +
-        '</span>' +
-        '</p>' +
-
-        '<p>' +
-        '<strong>Current Status:</strong> ' +
-        '<span id="tracking-current-status">📦 ' +
-        status +
-        '</span>' +
-        '</p>' +
-
-        '<p id="tracking-status-message" class="tracking-status-message">' +
-        statusMessage +
-        '</p>' +
-
-        '<h3>🛒 Order Products</h3>' +
-
-        productsHTML +
-
-        '<div class="tracking-timeline">' +
-
-        '<div class="tracking-step ' +
-        pendingClass +
-        '">' +
-        '<span>✓</span>' +
-        '<strong>Pending</strong>' +
-        '<small>Order Received</small>' +
-        '</div>' +
-
-        '<div class="tracking-line"></div>' +
-
-        '<div class="tracking-step ' +
-        processingClass +
-        '">' +
-        '<span>📦</span>' +
-        '<strong>Processing</strong>' +
-        '<small>Preparing Order</small>' +
-        '</div>' +
-
-        '<div class="tracking-line"></div>' +
-
-        '<div class="tracking-step ' +
-        shippedClass +
-        '">' +
-        '<span>🚚</span>' +
-        '<strong>Shipped</strong>' +
-        '<small>On the Way</small>' +
-        '</div>' +
-
-        '<div class="tracking-line"></div>' +
-
-        '<div class="tracking-step ' +
-        deliveryClass +
-        '">' +
-        '<span>🏠</span>' +
-        '<strong>Out for Delivery</strong>' +
-        '<small>Arriving Soon</small>' +
-        '</div>' +
-
-        '<div class="tracking-line"></div>' +
-
-        '<div class="tracking-step ' +
-        deliveredClass +
-        '">' +
-        '<span>✅</span>' +
-        '<strong>Delivered</strong>' +
-        '<small>Order Delivered</small>' +
-        '</div>' +
-
-        '</div>' +
-
-        '</div>'
-
-    } catch (error) {
-
-      console.error(
-        'Order tracking failed:',
-        error
-      )
-
-      trackingResult.innerHTML =
-        '<div class="empty-cart">' +
-
-        '<h3>⚠️ Server Connection Error</h3>' +
-
-        '<p>' +
-        'Please make sure the backend server is running.' +
-        '</p>' +
-
-        '</div>'
-    }
+    productsHTML +=
+      '</div>'
   }
+
+  if (status === 'Cancelled') {
+
+    trackingResult.innerHTML =
+      '<div class="order-tracking-result">' +
+
+      '<h2>Order Found ✅</h2>' +
+
+      '<p>' +
+      '<strong>Order Number:</strong> #' +
+      orderNumberText +
+      '</p>' +
+
+      '<p>' +
+      '<strong>Customer:</strong> ' +
+      customerName +
+      '</p>' +
+
+      '<p>' +
+      '<strong>Phone:</strong> ' +
+      phone +
+      '</p>' +
+
+      '<p>' +
+      '<strong>Address:</strong> ' +
+      address +
+      '</p>' +
+
+      '<p>' +
+      '<strong>City:</strong> ' +
+      city +
+      '</p>' +
+
+      '<p>' +
+      '<strong>Payment:</strong> ' +
+      paymentText +
+      '</p>' +
+
+      '<p>' +
+      '<strong>Total:</strong> Rs. ' +
+      total +
+      '</p>' +
+
+      '<p>' +
+      '<strong>Delivery:</strong> Rs. 100' +
+      '</p>' +
+
+      '<p>' +
+      '<strong>Last Updated:</strong> ' +
+      '<span id="tracking-last-updated">' +
+      (
+        order.lastUpdated
+          ? new Date(
+              order.lastUpdated
+            ).toLocaleString()
+          : 'Not available'
+      ) +
+      '</span>' +
+      '</p>' +
+
+      '<p>' +
+      '<strong>Current Status:</strong> ' +
+      '<span id="tracking-current-status">' +
+      '❌ ' +
+      status +
+      '</span>' +
+      '</p>' +
+
+      '<p id="tracking-status-message" class="tracking-status-message">' +
+      statusMessage +
+      '</p>' +
+
+      '</div>'
+
+    return
+  }
+
+  trackingResult.innerHTML =
+    '<div class="order-tracking-result">' +
+
+    '<h2>Order Found ✅</h2>' +
+
+    '<p>' +
+    '<strong>Order Number:</strong> #' +
+    orderNumberText +
+    '</p>' +
+
+    '<p>' +
+    '<strong>Customer:</strong> ' +
+    customerName +
+    '</p>' +
+
+    '<p>' +
+    '<strong>Phone:</strong> ' +
+    phone +
+    '</p>' +
+
+    '<p>' +
+    '<strong>Address:</strong> ' +
+    address +
+    '</p>' +
+
+    '<p>' +
+    '<strong>City:</strong> ' +
+    city +
+    '</p>' +
+
+    '<p>' +
+    '<strong>Payment:</strong> ' +
+    paymentText +
+    '</p>' +
+
+    '<p>' +
+    '<strong>Total:</strong> Rs. ' +
+    total +
+    '</p>' +
+
+    '<p>' +
+    '<strong>Delivery:</strong> Rs. 100' +
+    '</p>' +
+
+    '<p>' +
+    '<strong>Last Updated:</strong> ' +
+    '<span id="tracking-last-updated">' +
+    (
+      order.lastUpdated
+        ? new Date(
+            order.lastUpdated
+          ).toLocaleString()
+        : 'Not available'
+    ) +
+    '</span>' +
+    '</p>' +
+
+    '<p>' +
+    '<strong>Current Status:</strong> ' +
+    '<span id="tracking-current-status">' +
+    '📦 ' +
+    status +
+    '</span>' +
+    '</p>' +
+
+    '<p id="tracking-status-message" class="tracking-status-message">' +
+    statusMessage +
+    '</p>' +
+
+    '<h3>🛒 Order Products</h3>' +
+
+    productsHTML +
+
+    '<div class="tracking-timeline">' +
+
+    '<div class="tracking-step ' +
+    pendingClass +
+    '">' +
+    '<span>✓</span>' +
+    '<strong>Pending</strong>' +
+    '<small>Order Received</small>' +
+    '</div>' +
+
+    '<div class="tracking-line"></div>' +
+
+    '<div class="tracking-step ' +
+    processingClass +
+    '">' +
+    '<span>📦</span>' +
+    '<strong>Processing</strong>' +
+    '<small>Preparing Order</small>' +
+    '</div>' +
+
+    '<div class="tracking-line"></div>' +
+
+    '<div class="tracking-step ' +
+    shippedClass +
+    '">' +
+    '<span>🚚</span>' +
+    '<strong>Shipped</strong>' +
+    '<small>On the Way</small>' +
+    '</div>' +
+
+    '<div class="tracking-line"></div>' +
+
+    '<div class="tracking-step ' +
+    deliveryClass +
+    '">' +
+    '<span>🏠</span>' +
+    '<strong>Out for Delivery</strong>' +
+    '<small>Arriving Soon</small>' +
+    '</div>' +
+
+    '<div class="tracking-line"></div>' +
+
+    '<div class="tracking-step ' +
+    deliveredClass +
+    '">' +
+    '<span>✅</span>' +
+    '<strong>Delivered</strong>' +
+    '<small>Order Delivered</small>' +
+    '</div>' +
+
+    '</div>' +
+
+    '</div>'
+
+} catch (error) {
+
+  console.error(
+    'Order tracking failed:',
+    error
+  )
+
+  trackingResult.innerHTML =
+    '<div class="empty-cart">' +
+
+    '<h3>⚠️ Server Connection Error</h3>' +
+
+    '<p>' +
+    'Please make sure the backend server is running.' +
+    '</p>' +
+
+    '</div>'
+}
+
+}
 )
 
 async function silentlyRefreshTracking(): Promise<void> {
 
-  if (trackedOrderNumber === '') {
-    return
-  }
+if (trackedOrderNumber === '') {
+return
+}
 
-  try {
+try {
 
-    const response =
-      await fetch(
-        'http://localhost:5000/api/orders/' +
-        encodeURIComponent(
-          trackedOrderNumber
-        )
-      )
 
-    const result =
-      await response.json()
+const response =
+  await fetch(
+    `${import.meta.env.VITE_API_URL}/api/orders/` +
+    encodeURIComponent(
+      trackedOrderNumber
+    )
+  )
 
-    if (
-      !response.ok ||
-      !result.success
-    ) {
-      return
-    }
+const result =
+  await response.json()
 
-    const order =
-      result.order
+if (
+  !response.ok ||
+  !result.success
+) {
+  return
+}
 
-    const newStatus =
-      order.status || 'Pending'
+const order =
+  result.order
 
-    const newUpdated =
-      order.lastUpdated || ''
+const newStatus =
+  order.status || 'Pending'
 
-    if (
-      newStatus === lastTrackedStatus &&
-      newUpdated === lastTrackedUpdated
-    ) {
-      return
-    }
+const newUpdated =
+  order.lastUpdated || ''
 
-    lastTrackedStatus =
-      newStatus
+if (
+  newStatus === lastTrackedStatus &&
+  newUpdated === lastTrackedUpdated
+) {
+  return
+}
 
-    lastTrackedUpdated =
-      newUpdated
+lastTrackedStatus =
+  newStatus
 
-    const statusElement =
-      document.querySelector(
-        '#tracking-current-status'
-      )
-    const timelineSteps =
+lastTrackedUpdated =
+  newUpdated
+
+const statusElement =
+  document.querySelector(
+    '#tracking-current-status'
+  )
+
+const timelineSteps =
   document.querySelectorAll(
     '.tracking-step'
   )
-    const updatedElement =
-      document.querySelector(
-        '#tracking-last-updated'
-      )
 
-    const messageElement =
-      document.querySelector(
-        '#tracking-status-message'
-      )
+const updatedElement =
+  document.querySelector(
+    '#tracking-last-updated'
+  )
 
-    if (statusElement) {
+const messageElement =
+  document.querySelector(
+    '#tracking-status-message'
+  )
 
-      statusElement.textContent =
-        newStatus === 'Cancelled'
-          ? '❌ ' + newStatus
-          : '📦 ' + newStatus
-    }
+if (statusElement) {
 
-    if (updatedElement) {
+  statusElement.textContent =
+    newStatus === 'Cancelled'
+      ? '❌ ' + newStatus
+      : '📦 ' + newStatus
+}
 
-      updatedElement.textContent =
-        newUpdated
-          ? new Date(
-              newUpdated
-            ).toLocaleString()
-          : 'Not available'
-    }
+if (updatedElement) {
 
-    if (messageElement) {
+  updatedElement.textContent =
+    newUpdated
+      ? new Date(
+          newUpdated
+        ).toLocaleString()
+      : 'Not available'
+}
 
-      const messages:
-        Record<string, string> = {
+if (messageElement) {
 
-        Pending:
-          '🟡 Your order has been received and is waiting for processing.',
+  const messages:
+    Record<string, string> = {
 
-        Processing:
-          '🔵 Your order is currently being prepared.',
+    Pending:
+      '🟡 Your order has been received and is waiting for processing.',
 
-        Shipped:
-          '🚚 Your order has been shipped and is on the way.',
+    Processing:
+      '🔵 Your order is currently being prepared.',
 
-        'Out for Delivery':
-          '🏠 Your order is out for delivery and will arrive soon.',
+    Shipped:
+      '🚚 Your order has been shipped and is on the way.',
 
-        Delivered:
-          '✅ Your order has been successfully delivered.',
+    'Out for Delivery':
+      '🏠 Your order is out for delivery and will arrive soon.',
 
-        Cancelled:
-          '❌ This order has been cancelled.'
-      }
+    Delivered:
+      '✅ Your order has been successfully delivered.',
 
-      messageElement.textContent =
-        messages[newStatus] || ''
-    }
-    timelineSteps.forEach(
+    Cancelled:
+      '❌ This order has been cancelled.'
+  }
+
+  messageElement.textContent =
+    messages[newStatus] || ''
+}
+
+timelineSteps.forEach(
   (step) => {
+
     step.classList.remove(
       'active',
       'completed'
@@ -618,43 +625,56 @@ const statusOrder = [
 ]
 
 const currentIndex =
-  statusOrder.indexOf(newStatus)
+  statusOrder.indexOf(
+    newStatus
+  )
 
 timelineSteps.forEach(
   (step, index) => {
 
-    if (newStatus === 'Cancelled') {
+    if (
+      newStatus ===
+      'Cancelled'
+    ) {
       return
     }
 
-    if (index < currentIndex) {
+    if (
+      index < currentIndex
+    ) {
       step.classList.add(
         'completed'
       )
     }
 
-    if (index === currentIndex) {
+    if (
+      index === currentIndex
+    ) {
       step.classList.add(
         'active'
       )
     }
   }
 )
-    console.log(
-      'Order status updated:',
-      newStatus
-    )
 
-  } catch (error) {
+console.log(
+  'Order status updated:',
+  newStatus
+)
 
-    console.error(
-      'Silent tracking refresh failed:',
-      error
-    )
-  }
+
+} catch (error) {
+
+console.error(
+  'Silent tracking refresh failed:',
+  error
+)
+
+
+}
 }
 
 setInterval(
-  silentlyRefreshTracking,
-  10000
+silentlyRefreshTracking,
+10000
 )

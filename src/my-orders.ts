@@ -389,9 +389,9 @@ cancelButton?.addEventListener(
     try {
 
       const response =
-        await fetch(
-          `http://localhost:5000/api/orders/${orderNumber}`,
-          {
+  await fetch(
+    `${import.meta.env.VITE_API_URL}/api/orders/${orderNumber}`,
+    {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json'
@@ -492,9 +492,9 @@ async function loadMyOrders() {
   try {
 
     const response =
-      await fetch(
-        'http://localhost:5000/api/orders'
-      )
+  await fetch(
+    `${import.meta.env.VITE_API_URL}/api/orders`
+  )
 
     if (!response.ok) {
 

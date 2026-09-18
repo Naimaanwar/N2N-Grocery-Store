@@ -120,36 +120,182 @@
     }
 
     .status-select {
-  padding: 8px 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  background: white;
-  min-width: 150px;
-}
-.order-details-button {
-  border: none;
-  background: none;
-  padding: 0;
-  font-weight: bold;
-  color: #222;
-  cursor: pointer;
-  font-size: 15px;
-}
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      background: white;
+      min-width: 150px;
+    }
 
-.order-details-button:hover {
-  text-decoration: underline;
-}
+    .order-details-button {
+      border: none;
+      background: none;
+      padding: 0;
+      font-weight: bold;
+      color: #222;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .order-details-button:hover {
+      text-decoration: underline;
+    }
+
+    .order-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .order-actions button {
+      border: none;
+      padding: 7px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .cancel-order-button {
+      background: #f8d7da;
+      color: #842029;
+    }
+
+    .reopen-order-button {
+      background: #d1e7dd;
+      color: #0f5132;
+    }
+
+    .lock-order-button {
+      background: #fff3cd;
+      color: #664d03;
+    }
+
+    .unlock-order-button {
+      background: #cfe2ff;
+      color: #084298;
+    }
+
     .empty {
       text-align: center;
       padding: 30px;
       color: #666;
     }
 
+    /* =========================
+       ORDER MODAL
+    ========================= */
+
+    #order-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.55);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .modal-box {
+      background: white;
+      width: 90%;
+      max-width: 550px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.25);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+      color: #222;
+      margin: 0;
+    }
+
+    #close-order-modal {
+      border: none;
+      background: #eee;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+    }
+
+    #close-order-modal:hover {
+      background: #ddd;
+    }
+
+    #order-details-content {
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    #order-details-content p {
+      margin: 10px 0;
+      padding: 10px;
+      background: #f7f8fa;
+      border-radius: 6px;
+    }
+
+    #order-details-content h3 {
+      margin-top: 20px;
+    }
+
+    #order-details-content h2 {
+      margin-top: 15px;
+      padding: 12px;
+      background: #f0f2f5;
+      border-radius: 8px;
+    }
+
+    .order-product-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      margin: 8px 0;
+      background: #f7f8fa;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 700px) {
+
+      .stats {
+        flex-direction: column;
+      }
+
+      .admin-container {
+        padding: 0 10px;
+      }
+
+      .orders-box {
+        padding: 10px;
+      }
+
+    }
+
   </style>
 
 </head>
+
 
 <body>
 
@@ -164,8 +310,9 @@
 
   <main class="admin-container">
 
-
-    <!-- Statistics -->
+    <!-- =========================
+         STATISTICS
+    ========================= -->
 
     <div class="stats">
 
@@ -197,7 +344,9 @@
     </div>
 
 
-    <!-- Refresh Button -->
+    <!-- =========================
+         REFRESH
+    ========================= -->
 
     <button
       id="refresh-orders"
@@ -207,7 +356,9 @@
     </button>
 
 
-    <!-- Search -->
+    <!-- =========================
+         SEARCH
+    ========================= -->
 
     <input
       type="text"
@@ -217,127 +368,15 @@
     >
 
 
-    <!-- Orders -->
-<div
-  id="order-modal"
-  #order-modal h2 {
-  color: #222;
-  margin: 0;
-}
+    <!-- =========================
+         ORDERS
+    ========================= -->
 
-#order-details-content {
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-#order-details-content p {
-  margin: 10px 0;
-  padding: 10px;
-  background: #f7f8fa;
-  border-radius: 6px;
-}
-
-#order-details-content h3 {
-  margin-top: 20px;
-}
-
-#order-details-content h2 {
-  margin-top: 15px;
-  padding: 12px;
-  background: #f0f2f5;
-  border-radius: 8px;
-}
-
-#close-order-modal:hover {
-  background: #ddd !important;
-}
-.order-product-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 15px;
-  margin: 8px 0;
-  background: #f7f8fa;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 15px;
-}
-
-.order-status-badge {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 6px;
-  font-weight: bold;
-  background: #eee;
-}
-  style="
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.55);
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-  "
->
-
-  <div
-    style="
-      background: white;
-      width: 90%;
-      max-width: 550px;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 5px 25px rgba(0,0,0,0.25);
-    "
-  >
-
-    <div
-      style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-      "
-    >
-
-      <h2 id="modal-order-number">
-        Order Details
-      </h2>
-
-      <button
-        id="close-order-modal"
-        style="
-          border: none;
-          background: #eee;
-          width: 35px;
-          height: 35px;
-          border-radius: 50%;
-          cursor: pointer;
-          font-size: 20px;
-        "
-      >
-        ×
-      </button>
-
-    </div>
-
-    <div id="order-details-content"></div>
-
-  </div>
-
-</div>
     <section class="orders-box">
 
       <h2>
         📦 Customer Orders
       </h2>
-
 
       <div id="orders-container">
 
@@ -349,11 +388,50 @@
 
     </section>
 
-
   </main>
 
 
+  <!-- =========================
+       ORDER DETAILS MODAL
+  ========================= -->
+
+  <div
+    id="order-modal"
+  >
+
+    <div class="modal-box">
+
+      <div class="modal-header">
+
+        <h2 id="modal-order-number">
+          Order Details
+        </h2>
+
+        <button
+          id="close-order-modal"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div id="order-details-content"></div>
+
+    </div>
+
+  </div>
+
+
   <script>
+
+    /*
+      Railway API URL
+      VITE_API_URL Railway Variables se aayega.
+    */
+
+    const API_URL =
+      '%VITE_API_URL%'
+
 
     let allOrders = []
 
@@ -369,11 +447,12 @@
           'orders-container'
         )
 
+
       try {
 
         const response =
           await fetch(
-            'http://localhost:5000/api/orders'
+            `${API_URL}/api/orders`
           )
 
 
@@ -414,10 +493,12 @@
         document.getElementById(
           'total-sales'
         ).textContent =
-          `Rs. ${totalSales}`
+          `Rs. ${totalSales.toLocaleString()}`
 
 
-        displayOrders(allOrders)
+        displayOrders(
+          allOrders
+        )
 
 
       } catch (error) {
@@ -445,7 +526,6 @@
       }
 
     }
-
 
 
     // =========================
@@ -528,40 +608,36 @@
 
           <tbody>
 
-
             ${orders.map(
               order => `
 
               <tr>
 
-
                 <!-- Order Number -->
 
                 <td>
-  <button
-    class="order-details-button"
-    data-order="${order.orderNumber}"
-  >
-    #${order.orderNumber}
-  </button>
-</td>
+
+                  <button
+                    class="order-details-button"
+                    data-order="${order.orderNumber}"
+                  >
+                    #${order.orderNumber}
+                  </button>
+
+                </td>
 
 
                 <!-- Customer -->
 
                 <td>
-
-                  ${order.name}
-
+                  ${order.name || 'N/A'}
                 </td>
 
 
                 <!-- Phone -->
 
                 <td>
-
-                  ${order.phone}
-
+                  ${order.phone || 'N/A'}
                 </td>
 
 
@@ -569,11 +645,11 @@
 
                 <td>
 
-                  ${order.address}
+                  ${order.address || 'N/A'}
 
                   <br>
 
-                  ${order.city}
+                  ${order.city || ''}
 
                 </td>
 
@@ -586,17 +662,17 @@
                     .map(
                       item => `
 
-                      <div>
+                        <div>
 
-                        ${item.id}
+                          ${item.name || item.id}
 
-                        ×
+                          ×
 
-                        ${item.quantity}
+                          ${item.quantity || 1}
 
-                      </div>
+                        </div>
 
-                    `
+                      `
                     )
                     .join('')
                   }
@@ -608,90 +684,129 @@
 
                 <td>
 
-                  ${order.paymentMethod}
+                  ${order.paymentMethod || 'N/A'}
 
                 </td>
 
 
                 <!-- Status -->
 
-               <td>
+                <td>
 
-  <select
-    class="status-select"
-    data-order="${order.orderNumber}"
-  >
+                  <select
+                    class="status-select"
+                    data-order="${order.orderNumber}"
+                    onchange="updateStatusColor(this)"
+                  >
 
-    <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>
-      Pending
-    </option>
+                    <option
+                      value="Pending"
+                      ${order.status === 'Pending' ? 'selected' : ''}
+                    >
+                      Pending
+                    </option>
 
-    <option value="Confirmed" ${order.status === 'Confirmed' ? 'selected' : ''}>
-      Confirmed
-    </option>
+                    <option
+                      value="Confirmed"
+                      ${order.status === 'Confirmed' ? 'selected' : ''}
+                    >
+                      Confirmed
+                    </option>
 
-    <option value="Preparing" ${order.status === 'Preparing' ? 'selected' : ''}>
-      Preparing
-    </option>
+                    <option
+                      value="Preparing"
+                      ${order.status === 'Preparing' ? 'selected' : ''}
+                    >
+                      Preparing
+                    </option>
 
-    <option value="Out for Delivery" ${order.status === 'Out for Delivery' ? 'selected' : ''}>
-      Out for Delivery
-    </option>
+                    <option
+                      value="Out for Delivery"
+                      ${order.status === 'Out for Delivery' ? 'selected' : ''}
+                    >
+                      Out for Delivery
+                    </option>
 
-    <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>
-      Delivered
-    </option>
+                    <option
+                      value="Delivered"
+                      ${order.status === 'Delivered' ? 'selected' : ''}
+                    >
+                      Delivered
+                    </option>
 
-    <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>
-      Cancelled
-    </option>
+                    <option
+                      value="Cancelled"
+                      ${order.status === 'Cancelled' ? 'selected' : ''}
+                    >
+                      Cancelled
+                    </option>
 
-  </select>
+                  </select>
 
 
-  <div
-    class="order-actions"
-    style="margin-top: 10px;"
-  >
+                  <div
+                    class="order-actions"
+                    style="margin-top: 10px;"
+                  >
 
-   ${order.status !== 'Cancelled' ? `
-  <button
-    class="cancel-order-button"
-    data-order="${order.orderNumber}"
-  >
-    ❌ Cancel
-  </button>
-` : ''}
+                    ${
+                      order.status !== 'Cancelled'
+                        ? `
+                          <button
+                            class="cancel-order-button"
+                            data-order="${order.orderNumber}"
+                          >
+                            ❌ Cancel
+                          </button>
+                        `
+                        : ''
+                    }
 
-   ${order.status === 'Cancelled' ? `
-  <button
-    class="reopen-order-button"
-    data-order="${order.orderNumber}"
-  >
-    🔄 Reopen
-  </button>
-` : ''}
 
-    ${order.locked !== true ? `
-  <button
-    class="lock-order-button"
-    data-order="${order.orderNumber}"
-  >
-    🔒 Lock
-  </button>
-` : ''}
+                    ${
+                      order.status === 'Cancelled'
+                        ? `
+                          <button
+                            class="reopen-order-button"
+                            data-order="${order.orderNumber}"
+                          >
+                            🔄 Reopen
+                          </button>
+                        `
+                        : ''
+                    }
 
-${order.locked === true ? `
-  <button
-    class="unlock-order-button"
-    data-order="${order.orderNumber}"
-  >
-    🔓 Unlock
-  </button>
-` : ''}
-  </div>
 
-</td>
+                    ${
+                      order.locked !== true
+                        ? `
+                          <button
+                            class="lock-order-button"
+                            data-order="${order.orderNumber}"
+                          >
+                            🔒 Lock
+                          </button>
+                        `
+                        : ''
+                    }
+
+
+                    ${
+                      order.locked === true
+                        ? `
+                          <button
+                            class="unlock-order-button"
+                            data-order="${order.orderNumber}"
+                          >
+                            🔓 Unlock
+                          </button>
+                        `
+                        : ''
+                    }
+
+                  </div>
+
+                </td>
 
 
                 <!-- Total -->
@@ -699,17 +814,18 @@ ${order.locked === true ? `
                 <td>
 
                   <strong>
-                    Rs. ${order.total}
+                    Rs.
+                    ${Number(
+                      order.total || 0
+                    ).toLocaleString()}
                   </strong>
 
                 </td>
-
 
               </tr>
 
             `
             ).join('')}
-
 
           </tbody>
 
@@ -717,8 +833,21 @@ ${order.locked === true ? `
 
       `
 
-    }
 
+      // Apply status colors
+
+      document
+        .querySelectorAll(
+          '.status-select'
+        )
+        .forEach(
+          select =>
+            updateStatusColor(
+              select
+            )
+        )
+
+    }
 
 
     // =========================
@@ -733,7 +862,6 @@ ${order.locked === true ? `
         'click',
         loadOrders
       )
-
 
 
     // =========================
@@ -759,7 +887,6 @@ ${order.locked === true ? `
         const filteredOrders =
           allOrders.filter(
             order => {
-
 
               const orderNumber =
                 String(
@@ -808,7 +935,9 @@ ${order.locked === true ? `
                   .map(
                     item =>
                       String(
-                        item.id || ''
+                        item.name ||
+                        item.id ||
+                        ''
                       )
                   )
                   .join(' ')
@@ -871,7 +1000,6 @@ ${order.locked === true ? `
     )
 
 
-
     // =========================
     // STATUS UPDATE
     // =========================
@@ -879,7 +1007,6 @@ ${order.locked === true ? `
     document.addEventListener(
       'change',
       async event => {
-
 
         const target =
           event.target
@@ -906,32 +1033,24 @@ ${order.locked === true ? `
 
         try {
 
-
           const response =
             await fetch(
-
-              `http://localhost:5000/api/orders/${orderNumber}`,
-
+              `${API_URL}/api/orders/${orderNumber}`,
               {
 
                 method: 'PATCH',
 
                 headers: {
-
                   'Content-Type':
                     'application/json'
-
                 },
 
                 body:
                   JSON.stringify({
-
                     status: status
-
                   })
 
               }
-
             )
 
 
@@ -942,10 +1061,8 @@ ${order.locked === true ? `
           if (!response.ok) {
 
             throw new Error(
-
               result.message ||
               'Status update failed'
-
             )
 
           }
@@ -956,8 +1073,6 @@ ${order.locked === true ? `
             result.order
           )
 
-
-          // Update local data
 
           const index =
             allOrders.findIndex(
@@ -977,17 +1092,16 @@ ${order.locked === true ? `
 
         } catch (error) {
 
-
           console.error(
             'Status update failed:',
             error
           )
 
 
-         alert(
-  error.message ||
-  'Could not update order status.'
-)
+          alert(
+            error.message ||
+            'Could not update order status.'
+          )
 
 
           await loadOrders()
@@ -998,405 +1112,676 @@ ${order.locked === true ? `
     )
 
 
+    // =========================
+    // ORDER DETAILS
+    // =========================
+
+    document.addEventListener(
+      'click',
+      event => {
+
+        const target =
+          event.target
+
+
+        if (
+          !target.classList.contains(
+            'order-details-button'
+          )
+        ) {
+
+          return
+
+        }
+
+
+        const orderNumber =
+          target.dataset.order
+
+
+        const order =
+          allOrders.find(
+            item =>
+              item.orderNumber ===
+              orderNumber
+          )
+
+
+        if (!order) {
+
+          alert(
+            'Order not found.'
+          )
+
+          return
+
+        }
+
+
+        document.getElementById(
+          'modal-order-number'
+        ).textContent =
+          `Order #${order.orderNumber}`
+
+
+        document.getElementById(
+          'order-details-content'
+        ).innerHTML = `
+
+          <p>
+            <strong>👤 Customer:</strong>
+            ${order.name || 'N/A'}
+          </p>
+
+          <p>
+            <strong>📱 Phone:</strong>
+            ${order.phone || 'N/A'}
+          </p>
+
+          <p>
+            <strong>📍 Address:</strong>
+            ${order.address || 'N/A'},
+            ${order.city || ''}
+          </p>
+
+          <p>
+            <strong>💳 Payment:</strong>
+            ${order.paymentMethod || 'N/A'}
+          </p>
+
+          <p>
+            <strong>📦 Status:</strong>
+            ${order.status || 'Pending'}
+          </p>
+
+          <p>
+            <strong>🔒 Lock:</strong>
+            ${
+              order.locked
+                ? 'Locked'
+                : 'Unlocked'
+            }
+          </p>
+
+          <hr>
+
+          <h3>
+            🛒 Products
+          </h3>
+
+          ${
+            (order.items || [])
+              .map(
+                item => `
+                  <div class="order-product-card">
+
+                    <span>
+                      🛒
+                      ${item.name || item.id}
+                    </span>
+
+                    <strong>
+                      × ${item.quantity || 1}
+                    </strong>
+
+                  </div>
+                `
+              )
+              .join('')
+          }
+
+          <hr>
+
+          <h2>
+            💰 Total:
+            Rs.
+            ${Number(
+              order.total || 0
+            ).toLocaleString()}
+          </h2>
+
+        `
+
+
+        document.getElementById(
+          'order-modal'
+        ).style.display =
+          'flex'
+
+      }
+    )
+
+
+    // =========================
+    // CLOSE MODAL
+    // =========================
+
+    document
+      .getElementById(
+        'close-order-modal'
+      )
+      .addEventListener(
+        'click',
+        () => {
+
+          document.getElementById(
+            'order-modal'
+          ).style.display =
+            'none'
+
+        }
+      )
+
+
+    // Close modal when clicking outside
+
+    document
+      .getElementById(
+        'order-modal'
+      )
+      .addEventListener(
+        'click',
+        event => {
+
+          if (
+            event.target.id ===
+            'order-modal'
+          ) {
+
+            document.getElementById(
+              'order-modal'
+            ).style.display =
+              'none'
+
+          }
+
+        }
+      )
+
+
+    // =========================
+    // STATUS COLORS
+    // =========================
+
+    function updateStatusColor(
+      select
+    ) {
+
+      if (
+        select.value ===
+        'Pending'
+      ) {
+
+        select.style.background =
+          '#fff3cd'
+
+      }
+
+      else if (
+        select.value ===
+        'Confirmed'
+      ) {
+
+        select.style.background =
+          '#d1ecf1'
+
+      }
+
+      else if (
+        select.value ===
+        'Preparing'
+      ) {
+
+        select.style.background =
+          '#e2d9f3'
+
+      }
+
+      else if (
+        select.value ===
+        'Out for Delivery'
+      ) {
+
+        select.style.background =
+          '#cfe2ff'
+
+      }
+
+      else if (
+        select.value ===
+        'Delivered'
+      ) {
+
+        select.style.background =
+          '#d1e7dd'
+
+      }
+
+      else if (
+        select.value ===
+        'Cancelled'
+      ) {
+
+        select.style.background =
+          '#f8d7da'
+
+      }
+
+    }
+
+
+    // =========================
+    // CANCEL ORDER
+    // =========================
+
+    document.addEventListener(
+      'click',
+      async event => {
+
+        const target =
+          event.target
+
+
+        if (
+          !target.classList.contains(
+            'cancel-order-button'
+          )
+        ) {
+
+          return
+
+        }
+
+
+        const orderNumber =
+          target.dataset.order
+
+
+        const confirmCancel =
+          confirm(
+            `Are you sure you want to cancel order #${orderNumber}?`
+          )
+
+
+        if (!confirmCancel) {
+
+          return
+
+        }
+
+
+        try {
+
+          const response =
+            await fetch(
+              `${API_URL}/api/orders/${orderNumber}`,
+              {
+
+                method: 'PATCH',
+
+                headers: {
+                  'Content-Type':
+                    'application/json'
+                },
+
+                body:
+                  JSON.stringify({
+                    status:
+                      'Cancelled'
+                  })
+
+              }
+            )
+
+
+          const result =
+            await response.json()
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              result.message ||
+              'Cancel failed'
+            )
+
+          }
+
+
+          alert(
+            'Order cancelled successfully.'
+          )
+
+
+          await loadOrders()
+
+
+        } catch (error) {
+
+          console.error(
+            'Cancel order failed:',
+            error
+          )
+
+
+          alert(
+            'Could not cancel the order.'
+          )
+
+        }
+
+      }
+    )
+
+
+    // =========================
+    // REOPEN ORDER
+    // =========================
+
+    document.addEventListener(
+      'click',
+      async event => {
+
+        const target =
+          event.target
+
+
+        if (
+          !target.classList.contains(
+            'reopen-order-button'
+          )
+        ) {
+
+          return
+
+        }
+
+
+        const orderNumber =
+          target.dataset.order
+
+
+        try {
+
+          const response =
+            await fetch(
+              `${API_URL}/api/orders/${orderNumber}`,
+              {
+
+                method: 'PATCH',
+
+                headers: {
+                  'Content-Type':
+                    'application/json'
+                },
+
+                body:
+                  JSON.stringify({
+
+                    status:
+                      'Confirmed',
+
+                    locked:
+                      false
+
+                  })
+
+              }
+            )
+
+
+          const result =
+            await response.json()
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              result.message ||
+              'Reopen failed'
+            )
+
+          }
+
+
+          alert(
+            'Order reopened successfully.'
+          )
+
+
+          await loadOrders()
+
+
+        } catch (error) {
+
+          console.error(
+            'Reopen order failed:',
+            error
+          )
+
+
+          alert(
+            'Could not reopen the order.'
+          )
+
+        }
+
+      }
+    )
+
+
+    // =========================
+    // LOCK ORDER
+    // =========================
+
+    document.addEventListener(
+      'click',
+      async event => {
+
+        const target =
+          event.target
+
+
+        if (
+          !target.classList.contains(
+            'lock-order-button'
+          )
+        ) {
+
+          return
+
+        }
+
+
+        const orderNumber =
+          target.dataset.order
+
+
+        const confirmLock =
+          confirm(
+            `Are you sure you want to LOCK order #${orderNumber}?`
+          )
+
+
+        if (!confirmLock) {
+
+          return
+
+        }
+
+
+        try {
+
+          const response =
+            await fetch(
+              `${API_URL}/api/orders/${orderNumber}`,
+              {
+
+                method: 'PATCH',
+
+                headers: {
+                  'Content-Type':
+                    'application/json'
+                },
+
+                body:
+                  JSON.stringify({
+                    locked: true
+                  })
+
+              }
+            )
+
+
+          const result =
+            await response.json()
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              result.message ||
+              'Lock failed'
+            )
+
+          }
+
+
+          alert(
+            'Order locked successfully.'
+          )
+
+
+          await loadOrders()
+
+
+        } catch (error) {
+
+          console.error(
+            'Lock order failed:',
+            error
+          )
+
+
+          alert(
+            'Could not lock the order.'
+          )
+
+        }
+
+      }
+    )
+
+
+    // =========================
+    // UNLOCK ORDER
+    // =========================
+
+    document.addEventListener(
+      'click',
+      async event => {
+
+        const target =
+          event.target
+
+
+        if (
+          !target.classList.contains(
+            'unlock-order-button'
+          )
+        ) {
+
+          return
+
+        }
+
+
+        const orderNumber =
+          target.dataset.order
+
+
+        const confirmUnlock =
+          confirm(
+            `Are you sure you want to UNLOCK order #${orderNumber}?`
+          )
+
+
+        if (!confirmUnlock) {
+
+          return
+
+        }
+
+
+        try {
+
+          const response =
+            await fetch(
+              `${API_URL}/api/orders/${orderNumber}`,
+              {
+
+                method: 'PATCH',
+
+                headers: {
+                  'Content-Type':
+                    'application/json'
+                },
+
+                body:
+                  JSON.stringify({
+                    locked: false
+                  })
+
+              }
+            )
+
+
+          const result =
+            await response.json()
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              result.message ||
+              'Unlock failed'
+            )
+
+          }
+
+
+          alert(
+            'Order unlocked successfully.'
+          )
+
+
+          await loadOrders()
+
+
+        } catch (error) {
+
+          console.error(
+            'Unlock order failed:',
+            error
+          )
+
+
+          alert(
+            'Could not unlock the order.'
+          )
+
+        }
+
+      }
+    )
+
 
     // =========================
     // START
     // =========================
 
     loadOrders()
-document.addEventListener('click', (event) => {
 
-  const target = event.target
-
-  if (
-    !target.classList.contains(
-      'order-details-button'
-    )
-  ) {
-    return
-  }
-
-  const orderNumber =
-    target.dataset.order
-
-  const order =
-    allOrders.find(
-      item =>
-        item.orderNumber ===
-        orderNumber
-    )
-
-  if (!order) {
-    alert('Order not found.')
-    return
-  }
-
-  document.getElementById(
-    'modal-order-number'
-  ).textContent =
-    `Order #${order.orderNumber}`
-
-  document.getElementById(
-    'order-details-content'
-  ).innerHTML = `
-
-    <p>
-      <strong>👤 Customer:</strong>
-      ${order.name}
-    </p>
-
-    <p>
-      <strong>📱 Phone:</strong>
-      ${order.phone}
-    </p>
-
-    <p>
-      <strong>📍 Address:</strong>
-      ${order.address}, ${order.city}
-    </p>
-
-    <p>
-      <strong>💳 Payment:</strong>
-      ${order.paymentMethod}
-    </p>
-
-    <p>
-      <strong>📦 Status:</strong>
-      ${order.status}
-    </p>
-
-    <hr>
-
-    <h3>🛒 Products</h3>
-
-${(order.items || [])
-  .map(item => `
-    <div class="order-product-card">
-      <span>
-        🛒 ${item.id}
-      </span>
-
-      <strong>
-        × ${item.quantity}
-      </strong>
-    </div>
-  `)
-  .join('')
-}
-
-    <hr>
-
-    <h2>
-      💰 Total: Rs. ${order.total}
-    </h2>
-
-  `
-
-  document.getElementById(
-    'order-modal'
-  ).style.display = 'flex'
-
-})
-document
-  .getElementById('close-order-modal')
-  .addEventListener('click', () => {
-
-    document.getElementById(
-      'order-modal'
-    ).style.display = 'none'
-
-  })
-  function updateStatusColor(select) {
-
-  if (select.value === 'Pending') {
-    select.style.background = '#fff3cd'
-  }
-
-  else if (select.value === 'Confirmed') {
-    select.style.background = '#d1ecf1'
-  }
-
-  else if (select.value === 'Preparing') {
-    select.style.background = '#e2d9f3'
-  }
-
-  else if (select.value === 'Out for Delivery') {
-    select.style.background = '#cfe2ff'
-  }
-
-  else if (select.value === 'Delivered') {
-    select.style.background = '#d1e7dd'
-  }
-
-  else if (select.value === 'Cancelled') {
-    select.style.background = '#f8d7da'
-  }
-
-}
-
-
-// Existing status dropdowns
-document
-  .querySelectorAll('.status-select')
-  .forEach(select => {
-    updateStatusColor(select)
-  })
-
-
-// When status changes
-document.addEventListener('change', event => {
-
-  const target = event.target
-
-  if (
-    target.classList.contains(
-      'status-select'
-    )
-  ) {
-
-    updateStatusColor(target)
-
-  }
-
-})
-document.addEventListener('click', async (event) => {
-
-  const target = event.target
-
-  if (!target.classList.contains('cancel-order-button')) {
-    return
-  }
-
-  const orderNumber = target.dataset.order
-
-  const confirmCancel = confirm(
-    `Are you sure you want to cancel order #${orderNumber}?`
-  )
-
-  if (!confirmCancel) {
-    return
-  }
-
-  try {
-
-    const response = await fetch(
-      `http://localhost:5000/api/orders/${orderNumber}`,
-      {
-        method: 'PATCH',
-
-        headers: {
-          'Content-Type': 'application/json'
-        },
-
-        body: JSON.stringify({
-          status: 'Cancelled'
-        })
-      }
-    )
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(
-        result.message || 'Cancel failed'
-      )
-    }
-
-    alert('Order cancelled successfully.')
-
-    loadOrders()
-
-  } catch (error) {
-
-    console.error(
-      'Cancel order failed:',
-      error
-    )
-
-    alert(
-      'Could not cancel the order.'
-    )
-
-  }
-
-})
-document.addEventListener('click', async (event) => {
-
-  const target = event.target
-
-  if (!target.classList.contains('reopen-order-button')) {
-    return
-  }
-
-  const orderNumber = target.dataset.order
-
-  try {
-
-    const response = await fetch(
-      `http://localhost:5000/api/orders/${orderNumber}`,
-      {
-        method: 'PATCH',
-
-        headers: {
-          'Content-Type': 'application/json'
-        },
-
-        body: JSON.stringify({
-          status: 'Confirmed',
-          locked: false
-        })
-      }
-    )
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(
-        result.message || 'Reopen failed'
-      )
-    }
-
-    alert('Order reopened successfully.')
-
-    loadOrders()
-
-  } catch (error) {
-
-    console.error(
-      'Reopen order failed:',
-      error
-    )
-
-    alert(
-      'Could not reopen the order.'
-    )
-
-  }
-
-})
-document.addEventListener('click', async (event) => {
-
-  const target = event.target
-
-  if (!target.classList.contains('lock-order-button')) {
-    return
-  }
-
-  const orderNumber = target.dataset.order
-
-  const confirmLock = confirm(
-    `Are you sure you want to LOCK order #${orderNumber}?`
-  )
-
-  if (!confirmLock) {
-    return
-  }
-
-  try {
-
-    const response = await fetch(
-      `http://localhost:5000/api/orders/${orderNumber}`,
-      {
-        method: 'PATCH',
-
-        headers: {
-          'Content-Type': 'application/json'
-        },
-
-        body: JSON.stringify({
-          locked: true
-        })
-      }
-    )
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(
-        result.message || 'Lock failed'
-      )
-    }
-
-    alert('Order locked successfully.')
-
-    loadOrders()
-
-  } catch (error) {
-
-    console.error(
-      'Lock order failed:',
-      error
-    )
-
-    alert(
-      'Could not lock the order.'
-    )
-
-  }
-
-})
-document.addEventListener('click', async (event) => {
-
-  const target = event.target
-
-  if (!target.classList.contains('unlock-order-button')) {
-    return
-  }
-
-  const orderNumber = target.dataset.order
-
-  const confirmUnlock = confirm(
-    `Are you sure you want to UNLOCK order #${orderNumber}?`
-  )
-
-  if (!confirmUnlock) {
-    return
-  }
-
-  try {
-
-    const response = await fetch(
-      `http://localhost:5000/api/orders/${orderNumber}`,
-      {
-        method: 'PATCH',
-
-        headers: {
-          'Content-Type': 'application/json'
-        },
-
-        body: JSON.stringify({
-          locked: false
-        })
-      }
-    )
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(
-        result.message || 'Unlock failed'
-      )
-    }
-
-    alert('Order unlocked successfully.')
-
-    loadOrders()
-
-  } catch (error) {
-
-    console.error(
-      'Unlock order failed:',
-      error
-    )
-
-    alert(
-      error.message ||
-      'Could not unlock the order.'
-    )
-
-  }
-
-})
   </script>
 
 </body>

@@ -124,9 +124,9 @@ async function loadProducts() {
   try {
 
     const response =
-      await fetch(
-        'http://localhost:5000/api/products'
-      )
+  await fetch(
+    `${import.meta.env.VITE_API_URL}/api/orders`
+  )
 
     if (!response.ok) {
 
@@ -495,10 +495,10 @@ saveEditProductButton.addEventListener(
           )
       }
 
-      const response =
-        await fetch(
-          `http://localhost:5000/api/products/${editingProductId}`,
-          {
+     const response =
+  await fetch(
+    `${import.meta.env.VITE_API_URL}/api/products/${editingProductId}`,
+    {
             method: 'PUT',
 
             headers: {
@@ -647,9 +647,9 @@ addProductButton.addEventListener(
         )
 
       const response =
-        await fetch(
-          'http://localhost:5000/api/products',
-          {
+  await fetch(
+    `${import.meta.env.VITE_API_URL}/api/products`,
+    {
             method: 'POST',
 
             headers: {
@@ -735,9 +735,9 @@ async function deleteProduct(
   try {
 
     const response =
-      await fetch(
-        `http://localhost:5000/api/products/${id}`,
-        {
+  await fetch(
+    `${import.meta.env.VITE_API_URL}/api/products/${id}`,
+    {
           method: 'DELETE'
         }
       )

@@ -1,4 +1,3 @@
-
 const productNames: Record<string, string> = {
   apple: 'Fresh Apples',
   banana: 'Fresh Banana',
@@ -147,7 +146,7 @@ async function loadOrders(): Promise<void> {
 
 
     const response = await fetch(
-      'http://localhost:5000/api/orders'
+      `${import.meta.env.VITE_API_URL}/api/orders`
     )
 
 
@@ -195,7 +194,7 @@ async function loadOrders(): Promise<void> {
         <p>
           Backend:
           <strong>
-            http://localhost:5000
+            ${import.meta.env.VITE_API_URL}
           </strong>
         </p>
 
@@ -761,7 +760,7 @@ async function updateOrderStatus(
 
     const response =
       await fetch(
-        `http://localhost:5000/api/orders/${orderNumber}`,
+        `${import.meta.env.VITE_API_URL}/api/orders/${orderNumber}`,
         {
           method: 'PATCH',
 
@@ -851,7 +850,7 @@ async function updateOrderLock(
 
     const response =
       await fetch(
-        `http://localhost:5000/api/orders/${orderNumber}`,
+        `${import.meta.env.VITE_API_URL}/api/orders/${orderNumber}`,
         {
           method: 'PATCH',
 
@@ -977,33 +976,41 @@ function showOrderDetails(
     <div class="modal-order-info">
 
       <p>
-<p>
-  <strong>
-    Order Date:
-  </strong>
 
-  ${
-    order.createdAt
-      ? new Date(
+        <strong>
+          Order Date:
+        </strong>
+
+        ${
           order.createdAt
-        ).toLocaleString()
-      : 'N/A'
-  }
-</p>
+            ? new Date(
+                order.createdAt
+              ).toLocaleString()
+            : 'N/A'
+        }
 
-<p>
-  <strong>
-    Last Updated:
-  </strong>
+      </p>
 
-  ${
-    order.lastUpdated
-      ? new Date(
+
+      <p>
+
+        <strong>
+          Last Updated:
+        </strong>
+
+        ${
           order.lastUpdated
-        ).toLocaleString()
-      : 'N/A'
-  }
-</p>
+            ? new Date(
+                order.lastUpdated
+              ).toLocaleString()
+            : 'N/A'
+        }
+
+      </p>
+
+
+      <p>
+
         <strong>
           Order Number:
         </strong>
