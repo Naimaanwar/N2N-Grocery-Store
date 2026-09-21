@@ -33,10 +33,26 @@ fs.mkdirSync(productImagesDir, {
   recursive: true
 })
 
-// Uploaded product images browser mein available hongi
+// =========================
+// SERVE PRODUCT IMAGES
+// =========================
+
 app.use(
   '/product-images',
   express.static(productImagesDir)
+)
+
+// =========================
+// SERVE VITE FRONTEND
+// =========================
+
+const distDir = path.join(
+  process.cwd(),
+  'dist'
+)
+
+app.use(
+  express.static(distDir)
 )
 
 // =========================
@@ -48,7 +64,6 @@ function saveProductImage(
   imageName: string
 ): string {
 
-  // Correct Base64 image pattern
   const match = imageData.match(
     /^data:image\/(png|jpeg|jpg|webp);base64,(.+)$/
   )
@@ -58,6 +73,7 @@ function saveProductImage(
   }
 
   const imageType = match[1].toLowerCase()
+
   const base64Data = match[2]
 
   let extension = imageType
@@ -103,14 +119,29 @@ function saveProductImage(
 // =========================
 
 const db = mysql.createPool({
+
   host: process.env.DB_HOST,
+
   user: process.env.DB_USER,
+
   password: process.env.DB_PASSWORD,
+
   database: process.env.DB_NAME,
-  port: Number(process.env.DB_PORT || 3306),
+
+  port: Number(
+    process.env.DB_PORT || 3306
+  ),
+
+  ssl: {
+    rejectUnauthorized: true
+  },
+
   waitForConnections: true,
+
   connectionLimit: 10,
+
   queueLimit: 0
+
 })
 
 // =========================
@@ -118,6 +149,7 @@ const db = mysql.createPool({
 // =========================
 
 async function testDatabase() {
+
   try {
 
     const connection =
@@ -135,21 +167,12 @@ async function testDatabase() {
       'MySQL Connection Failed:',
       error
     )
+
   }
+
 }
 
 testDatabase()
-
-// =========================
-// HOME ROUTE
-// =========================
-
-app.get('/', (_req, res) => {
-
-  res.send(
-    'Grocery Store Backend is Running!'
-  )
-})
 
 // ==================================================
 // CREATE NEW ORDER + UPDATE STOCK
@@ -204,8 +227,10 @@ app.post(
           )
 
         if (!isNaN(lastNumber)) {
-          nextNumber = lastNumber + 1
+          nextNumber =
+            lastNumber + 1
         }
+
       }
 
       const orderNumber =
@@ -234,6 +259,7 @@ app.post(
           message:
             'Required order information missing'
         })
+
       }
 
       // =========================
@@ -264,6 +290,7 @@ app.post(
           throw new Error(
             'Invalid product or quantity'
           )
+
         }
 
         const [productRows] =
@@ -288,6 +315,7 @@ app.post(
           throw new Error(
             `Product not found: ${productCode}`
           )
+
         }
 
         const product =
@@ -301,7 +329,9 @@ app.post(
           throw new Error(
             `${product.name} has only ${product.stock} item(s) available.`
           )
+
         }
+
       }
 
       // =========================
@@ -362,6 +392,7 @@ app.post(
             item.id
           ]
         )
+
       }
 
       // =========================
@@ -415,7 +446,9 @@ app.post(
               console.log(
                 `WhatsApp CUSTOMER message failed for ${order.orderNumber} ❌`
               )
+
             }
+
           }
         )
         .catch(
@@ -425,6 +458,7 @@ app.post(
               `Customer WhatsApp error for ${order.orderNumber}:`,
               error
             )
+
           }
         )
 
@@ -452,6 +486,7 @@ app.post(
               return (
                 `• ${itemName} × ${item.quantity}`
               )
+
             }
           )
           .join('\n')
@@ -491,7 +526,9 @@ app.post(
               console.log(
                 `WhatsApp ADMIN notification failed for ${order.orderNumber} ❌`
               )
+
             }
+
           }
         )
         .catch(
@@ -501,6 +538,7 @@ app.post(
               `ADMIN WhatsApp error for ${order.orderNumber}:`,
               error
             )
+
           }
         )
 
@@ -509,19 +547,27 @@ app.post(
       // =========================
 
       return res.status(201).json({
+
         success: true,
+
         message:
           'Order placed successfully!',
+
         orderNumber:
           order.orderNumber
+
       })
 
     } catch (error) {
 
       try {
+
         await connection.rollback()
+
       } catch {
+
         // Ignore rollback error
+
       }
 
       connection.release()
@@ -532,13 +578,18 @@ app.post(
       )
 
       return res.status(400).json({
+
         success: false,
+
         message:
           error instanceof Error
             ? error.message
             : 'Failed to place order'
+
       })
+
     }
+
   }
 )
 
@@ -570,7 +621,9 @@ app.get(
         message:
           'Products fetch failed'
       })
+
     }
+
   }
 )
 
@@ -610,6 +663,7 @@ app.post(
           message:
             'Required product fields missing'
         })
+
       }
 
       // =========================
@@ -635,6 +689,7 @@ app.post(
 
         savedImage =
           image || ''
+
       }
 
       console.log(
@@ -703,7 +758,9 @@ app.post(
 
           unit:
             unit || ''
+
         }
+
       })
 
     } catch (error) {
@@ -719,8 +776,11 @@ app.post(
           error instanceof Error
             ? error.message
             : 'Product add failed'
+
       })
+
     }
+
   }
 )
 
@@ -757,6 +817,7 @@ app.put(
           message:
             'Required product fields missing'
         })
+
       }
 
       // =========================
@@ -785,6 +846,7 @@ app.put(
           message:
             'Product not found'
         })
+
       }
 
       const oldImage =
@@ -809,6 +871,7 @@ app.put(
             String(image),
             String(imageName || 'product')
           )
+
       }
 
       // =========================
@@ -845,6 +908,7 @@ app.put(
 
         image:
           savedImage
+
       })
 
     } catch (error) {
@@ -860,8 +924,11 @@ app.put(
           error instanceof Error
             ? error.message
             : 'Product update failed'
+
       })
+
     }
+
   }
 )
 
@@ -884,8 +951,10 @@ app.delete(
       )
 
       res.json({
+
         message:
           'Product deleted successfully'
+
       })
 
     } catch (error) {
@@ -896,10 +965,14 @@ app.delete(
       )
 
       res.status(500).json({
+
         message:
           'Product delete failed'
+
       })
+
     }
+
   }
 )
 
@@ -936,12 +1009,14 @@ app.get(
         (rows as any[])
           .map(
             order => ({
+
               ...order,
 
               items:
                 typeof order.items === 'string'
                   ? JSON.parse(order.items)
                   : order.items
+
             })
           )
 
@@ -955,11 +1030,16 @@ app.get(
       )
 
       res.status(500).json({
+
         success: false,
+
         message:
           'Failed to fetch orders'
+
       })
+
     }
+
   }
 )
 
@@ -1007,10 +1087,14 @@ app.get(
       ) {
 
         return res.status(404).json({
+
           success: false,
+
           message:
             'Order not found'
+
         })
+
       }
 
       const order = {
@@ -1023,11 +1107,15 @@ app.get(
                 result[0].items
               )
             : result[0].items
+
       }
 
       res.json({
+
         success: true,
+
         order
+
       })
 
     } catch (error) {
@@ -1038,11 +1126,16 @@ app.get(
       )
 
       res.status(500).json({
+
         success: false,
+
         message:
           'Failed to fetch order'
+
       })
+
     }
+
   }
 )
 
@@ -1088,10 +1181,14 @@ app.patch(
       ) {
 
         return res.status(404).json({
+
           success: false,
+
           message:
             'Order not found'
+
         })
+
       }
 
       const currentOrder =
@@ -1119,10 +1216,14 @@ app.patch(
         )
 
         return res.json({
+
           success: true,
+
           message:
             'Order unlocked successfully'
+
         })
+
       }
 
       // =========================
@@ -1135,10 +1236,14 @@ app.patch(
       ) {
 
         return res.status(403).json({
+
           success: false,
+
           message:
             'This order is locked and cannot be changed.'
+
         })
+
       }
 
       // =========================
@@ -1202,6 +1307,7 @@ app.patch(
             orderNumber
           ]
         )
+
       }
 
       // =========================
@@ -1288,6 +1394,7 @@ app.patch(
             `Your order #${orderNumber} has been Cancelled.\n\n` +
             `If you have any questions, please contact us.\n\n` +
             `Thank you.`
+
         }
 
         // =========================
@@ -1322,7 +1429,9 @@ app.patch(
                   console.log(
                     `WhatsApp status message failed for ${orderNumber} ❌`
                   )
+
                 }
+
               }
             )
             .catch(
@@ -1332,9 +1441,12 @@ app.patch(
                   `WhatsApp status error for ${orderNumber}:`,
                   error
                 )
+
               }
             )
+
         }
+
       }
 
       // =========================
@@ -1377,6 +1489,7 @@ app.patch(
                 updatedResult[0].items
               )
             : updatedResult[0].items
+
       }
 
       console.log(
@@ -1393,6 +1506,7 @@ app.patch(
 
         order:
           updatedOrder
+
       })
 
     } catch (error) {
@@ -1403,11 +1517,16 @@ app.patch(
       )
 
       res.status(500).json({
+
         success: false,
+
         message:
           'Failed to update order'
+
       })
+
     }
+
   }
 )
 
@@ -1415,14 +1534,19 @@ app.patch(
 // START SERVER
 // =========================
 
-const PORT = Number(process.env.PORT || 5000)
+const PORT =
+  Number(
+    process.env.PORT || 5000
+  )
 
 app.listen(
   PORT,
+  '0.0.0.0',
   () => {
 
     console.log(
-  `Backend running on port ${PORT}`
-)
+      `Backend running on port ${PORT}`
+    )
+
   }
 )
