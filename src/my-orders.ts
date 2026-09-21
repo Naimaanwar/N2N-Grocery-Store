@@ -40,14 +40,17 @@ const searchInput =
   document.querySelector<HTMLInputElement>(
     '#my-order-search'
   )!
+
 const statusFilter =
   document.querySelector<HTMLSelectElement>(
     '#my-order-status-filter'
   )!
-  const clearFiltersButton =
+
+const clearFiltersButton =
   document.querySelector<HTMLButtonElement>(
     '#clear-my-order-filters'
   )!
+
 const modal =
   document.querySelector<HTMLDivElement>(
     '#my-order-modal'
@@ -83,6 +86,7 @@ const productNames: Record<string, string> = {
   milk: 'Fresh Milk',
   bread: 'Brown Bread'
 }
+
 /* =========================
    PRODUCT PRICES
 ========================= */
@@ -98,6 +102,7 @@ const productPrices: Record<string, number> = {
 }
 
 const DELIVERY_CHARGE = 100
+
 function getProductName(
   item: OrderItem
 ) {
@@ -116,7 +121,6 @@ function getProductName(
 function getOrderTimeline(
   status: string
 ) {
-
   const steps = [
     {
       name: 'Pending',
@@ -148,50 +152,49 @@ function getOrderTimeline(
   return `
     <div class="my-order-timeline">
 
-      ${steps.map((step, index) => {
+      ${steps
+        .map((step, index) => {
+          const completed =
+            currentIndex >= 0 &&
+            index < currentIndex
 
-        const completed =
-          currentIndex >= 0 &&
-          index < currentIndex
+          const active =
+            index === currentIndex
 
-        const active =
-          index === currentIndex
+          return `
+            <div
+              class="my-order-timeline-step
+                ${completed ? 'completed' : ''}
+                ${active ? 'active' : ''}"
+            >
 
-        return `
-          <div
-            class="my-order-timeline-step
-              ${completed ? 'completed' : ''}
-              ${active ? 'active' : ''}"
-          >
+              <span>
+                ${step.icon}
+              </span>
 
-            <span>
-              ${step.icon}
-            </span>
+              <strong>
+                ${step.name}
+              </strong>
 
-            <strong>
-              ${step.name}
-            </strong>
+            </div>
 
-          </div>
-
-          ${
-            index < steps.length - 1
-              ? `
-                <div
-                  class="my-order-timeline-line
-                    ${
-                      currentIndex > index
-                        ? 'completed'
-                        : ''
-                    }"
-                ></div>
-              `
-              : ''
-          }
-
-        `
-
-      }).join('')}
+            ${
+              index < steps.length - 1
+                ? `
+                  <div
+                    class="my-order-timeline-line
+                      ${
+                        currentIndex > index
+                          ? 'completed'
+                          : ''
+                      }"
+                  ></div>
+                `
+                : ''
+            }
+          `
+        })
+        .join('')}
 
     </div>
   `
@@ -204,7 +207,6 @@ function getOrderTimeline(
 function showOrderDetails(
   order: Order
 ) {
-
   const orderDate =
     new Date(
       order.createdAt
@@ -216,49 +218,51 @@ function showOrderDetails(
           order.lastUpdated
         ).toLocaleString()
       : 'Not available'
+
   const subtotal =
-  order.items.reduce(
-    (sum, item) =>
-      sum +
-      (productPrices[item.id] || 0) *
-        item.quantity,
-    0
-  )
+    order.items.reduce(
+      (sum, item) =>
+        sum +
+        (productPrices[item.id] || 0) *
+          item.quantity,
+      0
+    )
 
-const deliveryCharge =
-  order.total > subtotal
-    ? order.total - subtotal
-    : DELIVERY_CHARGE
- const products =
-  order.items.map(item => {
+  const deliveryCharge =
+    order.total > subtotal
+      ? order.total - subtotal
+      : DELIVERY_CHARGE
 
-    const price =
-      productPrices[item.id] || 0
+  const products =
+    order.items
+      .map(item => {
+        const price =
+          productPrices[item.id] || 0
 
-    const itemTotal =
-      price * item.quantity
+        const itemTotal =
+          price * item.quantity
 
-    return `
-      <div class="modal-product-item">
+        return `
+          <div class="modal-product-item">
 
-        <div>
-          <strong>
-            ${getProductName(item)}
-          </strong>
+            <div>
+              <strong>
+                ${getProductName(item)}
+              </strong>
 
-          <small>
-            Rs. ${price} × ${item.quantity}
-          </small>
-        </div>
+              <small>
+                Rs. ${price} × ${item.quantity}
+              </small>
+            </div>
 
-        <strong>
-          Rs. ${itemTotal}
-        </strong>
+            <strong>
+              Rs. ${itemTotal}
+            </strong>
 
-      </div>
-    `
-
-  }).join('')
+          </div>
+        `
+      })
+      .join('')
 
   modalContent.innerHTML = `
 
@@ -327,36 +331,38 @@ const deliveryCharge =
 
     </div>
 
-   <div class="modal-order-total">
+    <div class="modal-order-total">
 
-  <div class="order-total-row">
-    <span>Products Subtotal</span>
-    <strong>Rs. ${subtotal}</strong>
-  </div>
+      <div class="order-total-row">
+        <span>Products Subtotal</span>
+        <strong>Rs. ${subtotal}</strong>
+      </div>
 
-  <div class="order-total-row">
-    <span>Delivery</span>
-    <strong>Rs. ${deliveryCharge}</strong>
-  </div>
+      <div class="order-total-row">
+        <span>Delivery</span>
+        <strong>Rs. ${deliveryCharge}</strong>
+      </div>
 
-  <div class="order-total-row order-final-total">
-    <span>Final Total</span>
-    <strong>Rs. ${order.total}</strong>
-  </div>
+      <div class="order-total-row order-final-total">
+        <span>Final Total</span>
+        <strong>Rs. ${order.total}</strong>
+      </div>
 
-</div>
-  ${
-  order.status === 'Pending'
-    ? `
-      <button
-        class="modal-cancel-button"
-        data-order="${order.orderNumber}"
-      >
-        ❌ Cancel Order
-      </button>
-    `
-    : ''
-}
+    </div>
+
+    ${
+      order.status === 'Pending'
+        ? `
+          <button
+            class="modal-cancel-button"
+            data-order="${order.orderNumber}"
+          >
+            ❌ Cancel Order
+          </button>
+        `
+        : ''
+    }
+
     <button
       class="modal-track-button"
       data-order="${order.orderNumber}"
@@ -365,74 +371,82 @@ const deliveryCharge =
     </button>
 
   `
-   const cancelButton =
-  modalContent.querySelector<HTMLButtonElement>(
-    '.modal-cancel-button'
+
+  /* =========================
+     CANCEL ORDER
+  ========================= */
+
+  const cancelButton =
+    modalContent.querySelector<HTMLButtonElement>(
+      '.modal-cancel-button'
+    )
+
+  cancelButton?.addEventListener(
+    'click',
+    async () => {
+      const orderNumber =
+        cancelButton.dataset.order
+
+      if (!orderNumber) return
+
+      const confirmed =
+        confirm(
+          `Are you sure you want to cancel Order #${orderNumber}?`
+        )
+
+      if (!confirmed) return
+
+      try {
+        const response =
+          await fetch(
+            `http://localhost:5000/api/orders/${orderNumber}`,
+            {
+              method: 'PATCH',
+              headers: {
+                'Content-Type':
+                  'application/json'
+              },
+              body: JSON.stringify({
+                status: 'Cancelled'
+              })
+            }
+          )
+
+        if (!response.ok) {
+          const errorData =
+            await response
+              .json()
+              .catch(() => null)
+
+          throw new Error(
+            errorData?.message ||
+            'Unable to cancel order'
+          )
+        }
+
+        alert(
+          'Order cancelled successfully.'
+        )
+
+        modal.classList.remove('show')
+
+        await loadMyOrders()
+
+      } catch (error) {
+        console.error(error)
+
+        alert(
+          'Unable to cancel order. Please try again.'
+        )
+      }
+    }
   )
 
-cancelButton?.addEventListener(
-  'click',
-  async () => {
-
-    const orderNumber =
-      cancelButton.dataset.order
-
-    if (!orderNumber) return
-
-    const confirmed =
-      confirm(
-        `Are you sure you want to cancel Order #${orderNumber}?`
-      )
-
-    if (!confirmed) return
-
-    try {
-
-      const response =
-  await fetch(
-    `${import.meta.env.VITE_API_URL}/api/orders/${orderNumber}`,
-    {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              status: 'Cancelled'
-            })
-          }
-        )
-
-      if (!response.ok) {
-
-        const errorData =
-          await response.json().catch(() => null)
-
-        throw new Error(
-          errorData?.message ||
-          'Unable to cancel order'
-        )
-
-      }
-
-      alert('Order cancelled successfully.')
-
-      modal.classList.remove('show')
-
-      await loadMyOrders()
-
-    } catch (error) {
-
-      console.error(error)
-
-      alert(
-        'Unable to cancel order. Please try again.'
-      )
-
-    }
-
-  }
-)  
   modal.classList.add('show')
+
+  /* =========================
+     TRACK FROM MODAL
+  ========================= */
 
   const trackButton =
     modalContent.querySelector<HTMLButtonElement>(
@@ -442,7 +456,6 @@ cancelButton?.addEventListener(
   trackButton?.addEventListener(
     'click',
     () => {
-
       const orderNumber =
         trackButton.dataset.order
 
@@ -450,7 +463,6 @@ cancelButton?.addEventListener(
 
       window.location.href =
         `/order-tracking.html?order=${orderNumber}`
-
     }
   )
 }
@@ -462,24 +474,16 @@ cancelButton?.addEventListener(
 closeModal.addEventListener(
   'click',
   () => {
-
     modal.classList.remove('show')
-
   }
 )
 
 modal.addEventListener(
   'click',
   event => {
-
-    if (
-      event.target === modal
-    ) {
-
+    if (event.target === modal) {
       modal.classList.remove('show')
-
     }
-
   }
 )
 
@@ -488,78 +492,79 @@ modal.addEventListener(
 ========================= */
 
 async function loadMyOrders() {
-
   try {
-
     const response =
-  await fetch(
-    `${import.meta.env.VITE_API_URL}/api/orders`
-  )
+      await fetch(
+        'http://localhost:5000/api/orders'
+      )
 
     if (!response.ok) {
-
       throw new Error(
         'Failed to load orders'
       )
-
     }
 
     const orders: Order[] =
       await response.json()
 
-    /* CUSTOMER ORDERS */
+    /* =========================
+       CUSTOMER ORDERS
+    ========================= */
 
-   const myOrders =
-  orders.filter(order => {
+    const myOrders =
+      orders.filter(order => {
+        const phoneMatch =
+          order.phone === user.phone
 
-    const phoneMatch =
-      order.phone === user.phone
+        const nameMatch =
+          order.name &&
+          user.name &&
+          order.name.toLowerCase() ===
+            user.name.toLowerCase()
 
-    const nameMatch =
-      order.name &&
-      user.name &&
-      order.name.toLowerCase() ===
-        user.name.toLowerCase()
+        return (
+          phoneMatch ||
+          nameMatch
+        )
+      })
 
-    return phoneMatch || nameMatch
+    /* =========================
+       SEARCH
+    ========================= */
 
-  })
-
-    /* SEARCH */
-
-   const searchText =
-  searchInput.value
-    .toLowerCase()
-    .trim()
-
-const selectedStatus =
-  statusFilter.value
-
-const filteredOrders =
-  myOrders.filter(order => {
-
-    const matchesSearch =
-      order.orderNumber
+    const searchText =
+      searchInput.value
         .toLowerCase()
-        .includes(searchText)
+        .trim()
 
-    const matchesStatus =
-      selectedStatus === 'all' ||
-      order.status === selectedStatus
+    const selectedStatus =
+      statusFilter.value
 
-    return (
-      matchesSearch &&
-      matchesStatus
-    )
+    const filteredOrders =
+      myOrders.filter(order => {
+        const matchesSearch =
+          order.orderNumber
+            .toLowerCase()
+            .includes(searchText)
 
-  })
+        const matchesStatus =
+          selectedStatus === 'all' ||
+          order.status ===
+            selectedStatus
 
-    /* NO ORDERS */
+        return (
+          matchesSearch &&
+          matchesStatus
+        )
+      })
+
+    /* =========================
+       NO ORDERS
+    ========================= */
 
     if (
       filteredOrders.length === 0
     ) {
-
       ordersList.innerHTML = `
 
         <div class="empty-cart">
@@ -587,7 +592,9 @@ const filteredOrders =
       return
     }
 
-    /* SORT NEWEST FIRST */
+    /* =========================
+       SORT NEWEST FIRST
+    ========================= */
 
     filteredOrders.sort(
       (a, b) =>
@@ -599,12 +606,13 @@ const filteredOrders =
         ).getTime()
     )
 
-    /* DISPLAY ORDERS */
+    /* =========================
+       DISPLAY ORDERS
+    ========================= */
 
     ordersList.innerHTML =
       filteredOrders
         .map(order => {
-
           const orderDate =
             new Date(
               order.createdAt
@@ -612,12 +620,14 @@ const filteredOrders =
 
           const products =
             order.items
-              .map(item => `
-                <div>
-                  ${getProductName(item)}
-                  × ${item.quantity}
-                </div>
-              `)
+              .map(
+                item => `
+                  <div>
+                    ${getProductName(item)}
+                    × ${item.quantity}
+                  </div>
+                `
+              )
               .join('')
 
           return `
@@ -637,15 +647,17 @@ const filteredOrders =
                 <strong>Total:</strong>
                 Rs. ${order.total}
               </p>
-              <p>
-  <strong>Customer:</strong>
-  ${order.name || user.name}
-</p>
 
-<p>
-  <strong>Phone:</strong>
-  ${order.phone || user.phone}
-</p>
+              <p>
+                <strong>Customer:</strong>
+                ${order.name || user.name}
+              </p>
+
+              <p>
+                <strong>Phone:</strong>
+                ${order.phone || user.phone}
+              </p>
+
               <p>
 
                 <strong>Status:</strong>
@@ -664,23 +676,27 @@ const filteredOrders =
               ${getOrderTimeline(
                 order.status
               )}
+
               <div class="my-order-status-message">
-  ${
-    order.status === 'Pending'
-      ? '⏳ Your order is waiting for confirmation.'
-      : order.status === 'Processing'
-      ? '⚙️ Your order is being prepared.'
-      : order.status === 'Shipped'
-      ? '🚚 Your order has been shipped.'
-      : order.status === 'Out for Delivery'
-      ? '🛵 Your order is out for delivery.'
-      : order.status === 'Delivered'
-      ? '✅ Your order has been delivered successfully.'
-      : order.status === 'Cancelled'
-      ? '❌ This order has been cancelled.'
-      : '📦 Your order status is being updated.'
-  }
-</div>
+
+                ${
+                  order.status === 'Pending'
+                    ? '⏳ Your order is waiting for confirmation.'
+                    : order.status === 'Processing'
+                    ? '⚙️ Your order is being prepared.'
+                    : order.status === 'Shipped'
+                    ? '🚚 Your order has been shipped.'
+                    : order.status === 'Out for Delivery'
+                    ? '🛵 Your order is out for delivery.'
+                    : order.status === 'Delivered'
+                    ? '✅ Your order has been delivered successfully.'
+                    : order.status === 'Cancelled'
+                    ? '❌ This order has been cancelled.'
+                    : '📦 Your order status is being updated.'
+                }
+
+              </div>
+
               <div>
 
                 <strong>
@@ -714,7 +730,6 @@ const filteredOrders =
             </div>
 
           `
-
         })
         .join('')
 
@@ -727,11 +742,9 @@ const filteredOrders =
         '.view-my-order'
       )
       .forEach(button => {
-
         button.addEventListener(
           'click',
           () => {
-
             const orderNumber =
               button.dataset.order
 
@@ -749,12 +762,10 @@ const filteredOrders =
             showOrderDetails(
               order
             )
-
           }
         )
-
       })
-    
+
     /* =========================
        TRACK ORDER BUTTON
     ========================= */
@@ -764,11 +775,9 @@ const filteredOrders =
         '.track-my-order'
       )
       .forEach(button => {
-
         button.addEventListener(
           'click',
           () => {
-
             const orderNumber =
               button.dataset.order
 
@@ -776,14 +785,11 @@ const filteredOrders =
 
             window.location.href =
               `/order-tracking.html?order=${orderNumber}`
-
           }
         )
-
       })
 
   } catch (error) {
-
     console.error(error)
 
     ordersList.innerHTML = `
@@ -802,9 +808,7 @@ const filteredOrders =
       </div>
 
     `
-
   }
-
 }
 
 /* =========================
@@ -814,19 +818,35 @@ const filteredOrders =
 searchInput.addEventListener(
   'input',
   () => {
-
     loadMyOrders()
-
   }
 )
+
+/* =========================
+   STATUS FILTER
+========================= */
+
 statusFilter.addEventListener(
   'change',
   () => {
-
     loadMyOrders()
-
   }
 )
+
+/* =========================
+   CLEAR FILTERS
+========================= */
+
+clearFiltersButton.addEventListener(
+  'click',
+  () => {
+    searchInput.value = ''
+    statusFilter.value = 'all'
+
+    loadMyOrders()
+  }
+)
+
 /* =========================
    INITIAL LOAD
 ========================= */
@@ -839,21 +859,7 @@ loadMyOrders()
 
 setInterval(
   () => {
-
     loadMyOrders()
-
   },
   10000
-)
-clearFiltersButton.addEventListener(
-  'click',
-  () => {
-
-    searchInput.value = ''
-
-    statusFilter.value = 'all'
-
-    loadMyOrders()
-
-  }
 )

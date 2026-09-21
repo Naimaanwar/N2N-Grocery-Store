@@ -146,7 +146,7 @@ async function loadOrders(): Promise<void> {
 
 
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/orders`
+      'http://localhost:5000/api/orders'
     )
 
 
@@ -194,7 +194,7 @@ async function loadOrders(): Promise<void> {
         <p>
           Backend:
           <strong>
-            ${import.meta.env.VITE_API_URL}
+            http://localhost:5000
           </strong>
         </p>
 
@@ -760,7 +760,7 @@ async function updateOrderStatus(
 
     const response =
       await fetch(
-        `${import.meta.env.VITE_API_URL}/api/orders/${orderNumber}`,
+        `http://localhost:5000/api/orders/${orderNumber}`,
         {
           method: 'PATCH',
 
@@ -850,7 +850,7 @@ async function updateOrderLock(
 
     const response =
       await fetch(
-        `${import.meta.env.VITE_API_URL}/api/orders/${orderNumber}`,
+        `http://localhost:5000/api/orders/${orderNumber}`,
         {
           method: 'PATCH',
 

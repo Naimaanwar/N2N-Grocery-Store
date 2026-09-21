@@ -3,8 +3,20 @@ import cors from 'cors'
 import mysql from 'mysql2/promise'
 import fs from 'fs'
 import path from 'path'
-import { sendWhatsAppMessage } from './whatsapp'
+let sendWhatsAppMessage: (
+  phone: string,
+  message: string
+) => Promise<boolean>
 
+if (process.env.RENDER) {
+  sendWhatsAppMessage = async () => {
+    console.log('WhatsApp disabled on Render.')
+    return false
+  }
+} else {
+  const whatsapp = await import('./whatsapp')
+  sendWhatsAppMessage = whatsapp.sendWhatsAppMessage
+}
 const app = express()
 
 app.use(cors())

@@ -69,8 +69,8 @@ trackingResult.innerHTML =
 try {
 
   const url =
-    `${import.meta.env.VITE_API_URL}/api/orders/` +
-    encodeURIComponent(orderNumber)
+  `http://localhost:5000/api/orders/` +
+  encodeURIComponent(orderNumber)
 
   const response =
     await fetch(url)
@@ -502,12 +502,11 @@ try {
 
 const response =
   await fetch(
-    `${import.meta.env.VITE_API_URL}/api/orders/` +
+    `http://localhost:5000/api/orders/` +
     encodeURIComponent(
       trackedOrderNumber
     )
   )
-
 const result =
   await response.json()
 
