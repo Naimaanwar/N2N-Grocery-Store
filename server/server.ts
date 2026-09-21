@@ -133,9 +133,8 @@ const db = mysql.createPool({
   ),
 
   ssl: {
-    rejectUnauthorized: true
-  },
-
+  rejectUnauthorized: false
+},
   waitForConnections: true,
 
   connectionLimit: 10,
