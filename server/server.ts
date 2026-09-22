@@ -1563,60 +1563,180 @@ app.listen(
 
 app.get(
   '/whatsapp-qr',
-  (_req, res) => {
+  async (_req, res) => {
 
-    const qr =
-      whatsapp.getWhatsAppQR()
+    console.log(
+      'WhatsApp QR page opened.'
+    )
 
-    if (!qr) {
+    // WhatsApp manually start karein
+    whatsapp.startWhatsApp()
 
-      return res.status(404).send(
-        '<h2>WhatsApp QR is not available yet.</h2><p>Please wait and refresh.</p>'
+    // QR generate hone ka wait
+    for (
+      let i = 0;
+      i < 20;
+      i++
+    ) {
+
+      const qr =
+        whatsapp.getWhatsAppQR()
+
+      if (qr) {
+
+        return res.send(`
+
+          <!DOCTYPE html>
+
+          <html>
+
+          <head>
+
+            <title>N2N WhatsApp QR</title>
+
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1"
+            >
+
+            <style>
+
+              body {
+
+                font-family: Arial, sans-serif;
+
+                text-align: center;
+
+                padding: 30px;
+
+                background: #f5f5f5;
+
+              }
+
+              .box {
+
+                background: white;
+
+                max-width: 500px;
+
+                margin: auto;
+
+                padding: 30px;
+
+                border-radius: 15px;
+
+                box-shadow:
+                  0 2px 10px
+                  rgba(0,0,0,0.1);
+
+              }
+
+              img {
+
+                width: 350px;
+
+                max-width: 90%;
+
+                margin: 20px 0;
+
+              }
+
+              h1 {
+
+                margin-bottom: 10px;
+
+              }
+
+              p {
+
+                color: #555;
+
+              }
+
+            </style>
+
+          </head>
+
+          <body>
+
+            <div class="box">
+
+              <h1>
+                N2N Grocery Store
+              </h1>
+
+              <p>
+                WhatsApp QR Code
+              </p>
+
+              <img
+                src="${qr}"
+                alt="WhatsApp QR Code"
+              >
+
+              <p>
+                WhatsApp →
+                Linked Devices →
+                Link a Device
+              </p>
+
+            </div>
+
+          </body>
+
+          </html>
+
+        `)
+
+      }
+
+      // 1 second wait
+      await new Promise(
+        resolve =>
+          setTimeout(resolve, 1000)
       )
+
     }
 
-    res.send(`
+    // QR abhi available nahi hua
+    return res.status(202).send(`
+
       <!DOCTYPE html>
+
       <html>
+
       <head>
-        <title>N2N WhatsApp QR</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 30px;
-          }
 
-          img {
-            width: 350px;
-            max-width: 90%;
-          }
+        <title>N2N WhatsApp</title>
 
-          h1 {
-            margin-bottom: 10px;
-          }
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1"
+        >
 
-          p {
-            color: #555;
-          }
-        </style>
       </head>
 
-      <body>
+      <body
+        style="
+          font-family: Arial;
+          text-align: center;
+          padding: 40px;
+        "
+      >
 
-        <h1>N2N Grocery Store</h1>
-
-        <p>WhatsApp QR Code</p>
-
-        <img src="${qr}" alt="WhatsApp QR Code">
+        <h2>
+          WhatsApp is starting...
+        </h2>
 
         <p>
-          WhatsApp → Linked Devices → Link a Device
+          Please refresh this page in a few seconds.
         </p>
 
       </body>
+
       </html>
+
     `)
+
   }
 )

@@ -1,4 +1,3 @@
-
 import pkg from 'whatsapp-web.js'
 import qrcode from 'qrcode-terminal'
 import QRCode from 'qrcode'
@@ -78,7 +77,7 @@ const client = new Client({
       '--disable-background-timer-throttling',
       '--disable-renderer-backgrounding',
       '--disable-features=Translate,BackForwardCache',
-      '--no-first-run',
+      '--no-first-run'
     ]
 
   }
@@ -389,22 +388,42 @@ async function reconnectWhatsApp(): Promise<boolean> {
 }
 
 /*
- * Start WhatsApp automatically.
+ * Start WhatsApp manually.
  *
- * Temporarily disabled for Render debugging.
- * WhatsApp will start only when a message needs to be sent.
+ * Render startup par WhatsApp automatically
+ * start nahi hoga.
+ *
+ * QR page se manually start kiya ja sakta hai.
  */
-console.log(
-  'WhatsApp automatic startup is temporarily disabled for debugging.'
-)
+export function startWhatsApp() {
+
+  if (
+    isInitializing ||
+    isReady
+  ) {
+
+    console.log(
+      'WhatsApp is already starting or ready.'
+    )
+
+    return
+  }
+
+  console.log(
+    'Manual WhatsApp startup requested.'
+  )
+
+  initializeWhatsApp()
+}
 
 /*
  * Send WhatsApp message.
  *
  * Important:
  * ACK / delivery-status checking intentionally removed.
- * WhatsApp LID chats mein sendMessage() ke baad
- * message ID reliable nahi hoti.
+ *
+ * WhatsApp LID chats mein sendMessage()
+ * ke baad message ID reliable nahi hoti.
  */
 export async function sendWhatsAppMessage(
   phone: string,
