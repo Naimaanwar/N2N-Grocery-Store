@@ -390,8 +390,13 @@ async function reconnectWhatsApp(): Promise<boolean> {
 
 /*
  * Start WhatsApp automatically.
+ *
+ * Temporarily disabled for Render debugging.
+ * WhatsApp will start only when a message needs to be sent.
  */
-initializeWhatsApp()
+console.log(
+  'WhatsApp automatic startup is temporarily disabled for debugging.'
+)
 
 /*
  * Send WhatsApp message.
