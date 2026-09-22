@@ -8,15 +8,9 @@ let sendWhatsAppMessage: (
   message: string
 ) => Promise<boolean>
 
-if (process.env.RENDER) {
-  sendWhatsAppMessage = async () => {
-    console.log('WhatsApp disabled on Render.')
-    return false
-  }
-} else {
-  const whatsapp = await import('./whatsapp')
-  sendWhatsAppMessage = whatsapp.sendWhatsAppMessage
-}
+const whatsapp = await import('./whatsapp')
+
+sendWhatsAppMessage = whatsapp.sendWhatsAppMessage
 const app = express()
 
 app.use(cors())
