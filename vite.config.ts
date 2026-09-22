@@ -21,7 +21,8 @@ export default defineConfig({
         'my-orders': resolve(__dirname, 'my-orders.html'),
         'order-tracking': resolve(__dirname, 'order-tracking.html'),
         'thank-you': resolve(__dirname, 'thank-you.html'),
-        'admin-orders': resolve(__dirname, 'admin-orders.html')
+        'admin-orders': resolve(__dirname, 'admin-orders.html'),
+        admin: resolve(__dirname, 'admin/admin.html')
       }
     }
   }
