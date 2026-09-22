@@ -1,3 +1,4 @@
+
 const isLoggedIn =
   localStorage.getItem('groceryLoggedIn')
 
@@ -9,6 +10,12 @@ if (isLoggedIn !== 'true') {
 
   window.location.href = '/login.html'
 }
+
+/* =========================
+   API URL
+========================= */
+
+const API_URL = import.meta.env.VITE_API_URL
 
 type OrderItem = {
   id: string
@@ -399,7 +406,7 @@ function showOrderDetails(
       try {
         const response =
           await fetch(
-            `http://localhost:5000/api/orders/${orderNumber}`,
+            `${API_URL}/api/orders/${orderNumber}`,
             {
               method: 'PATCH',
               headers: {
@@ -495,7 +502,7 @@ async function loadMyOrders() {
   try {
     const response =
       await fetch(
-        'http://localhost:5000/api/orders'
+        `${API_URL}/api/orders`
       )
 
     if (!response.ok) {

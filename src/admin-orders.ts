@@ -1,3 +1,10 @@
+// ========================================
+// API URL
+// ========================================
+
+const API_URL = import.meta.env.VITE_API_URL
+
+
 const productNames: Record<string, string> = {
   apple: 'Fresh Apples',
   banana: 'Fresh Banana',
@@ -146,7 +153,7 @@ async function loadOrders(): Promise<void> {
 
 
     const response = await fetch(
-      'http://localhost:5000/api/orders'
+      `${API_URL}/api/orders`
     )
 
 
@@ -194,7 +201,7 @@ async function loadOrders(): Promise<void> {
         <p>
           Backend:
           <strong>
-            http://localhost:5000
+            ${API_URL}
           </strong>
         </p>
 
@@ -760,7 +767,7 @@ async function updateOrderStatus(
 
     const response =
       await fetch(
-        `http://localhost:5000/api/orders/${orderNumber}`,
+        `${API_URL}/api/orders/${orderNumber}`,
         {
           method: 'PATCH',
 
@@ -850,7 +857,7 @@ async function updateOrderLock(
 
     const response =
       await fetch(
-        `http://localhost:5000/api/orders/${orderNumber}`,
+        `${API_URL}/api/orders/${orderNumber}`,
         {
           method: 'PATCH',
 

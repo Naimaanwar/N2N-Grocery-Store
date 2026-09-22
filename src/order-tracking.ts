@@ -1,5 +1,9 @@
+
 const isLoggedIn =
 localStorage.getItem('groceryLoggedIn')
+
+const API_URL =
+import.meta.env.VITE_API_URL
 
 if (isLoggedIn !== 'true') {
 localStorage.setItem(
@@ -69,7 +73,7 @@ trackingResult.innerHTML =
 try {
 
   const url =
-  `http://localhost:5000/api/orders/` +
+  `${API_URL}/api/orders/` +
   encodeURIComponent(orderNumber)
 
   const response =
@@ -499,14 +503,14 @@ return
 
 try {
 
-
 const response =
   await fetch(
-    `http://localhost:5000/api/orders/` +
+    `${API_URL}/api/orders/` +
     encodeURIComponent(
       trackedOrderNumber
     )
   )
+
 const result =
   await response.json()
 
@@ -661,14 +665,12 @@ console.log(
   newStatus
 )
 
-
 } catch (error) {
 
 console.error(
   'Silent tracking refresh failed:',
   error
 )
-
 
 }
 }

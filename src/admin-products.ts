@@ -1,3 +1,4 @@
+
 import appleImg from './assets/apple.png'
 import bananaImg from './assets/banana.png'
 import mangoImg from './assets/mango.png'
@@ -5,6 +6,12 @@ import guavaImg from './assets/guava.png'
 import strawberryImg from './assets/strawberry.png'
 import milkImg from './assets/milk.png'
 import breadImg from './assets/bread.png'
+
+// =========================
+// API URL
+// =========================
+
+const API_URL = import.meta.env.VITE_API_URL
 
 // =========================
 // PRODUCT IMAGES
@@ -124,7 +131,7 @@ async function loadProducts() {
 
     const response =
       await fetch(
-        'http://localhost:5000/api/products'
+        `${API_URL}/api/products`
       )
 
     if (!response.ok) {
@@ -496,7 +503,7 @@ saveEditProductButton.addEventListener(
 
       const response =
         await fetch(
-          `http://localhost:5000/api/products/${editingProductId}`,
+          `${API_URL}/api/products/${editingProductId}`,
           {
             method: 'PUT',
 
@@ -647,7 +654,7 @@ addProductButton.addEventListener(
 
       const response =
         await fetch(
-          'http://localhost:5000/api/products',
+          `${API_URL}/api/products`,
           {
             method: 'POST',
 
@@ -735,7 +742,7 @@ async function deleteProduct(
 
     const response =
       await fetch(
-        `http://localhost:5000/api/products/${id}`,
+        `${API_URL}/api/products/${id}`,
         {
           method: 'DELETE'
         }

@@ -1,5 +1,9 @@
+
 const isLoggedIn =
   localStorage.getItem('groceryLoggedIn')
+
+const API_URL =
+  import.meta.env.VITE_API_URL
 
 if (isLoggedIn !== 'true') {
 
@@ -139,15 +143,11 @@ async function loadProducts() {
 
   try {
 
-   const API_URL =
-  window.location.hostname === 'localhost'
-    ? 'http://localhost:5000'
-    : ''
+    const response =
+      await fetch(
+        `${API_URL}/api/products`
+      )
 
-const response =
-  await fetch(
-    `${API_URL}/api/products`
-  )
     if (!response.ok) {
 
       throw new Error(
@@ -340,6 +340,7 @@ function renderCart() {
       document.createElement(
         'div'
       )
+
 
     item.className =
       'cart-page-item'
@@ -590,6 +591,7 @@ if (checkoutButton) {
        */
       loadCartFromStorage()
 
+
       if (
         Object.keys(cart).length === 0
       ) {
@@ -600,6 +602,7 @@ if (checkoutButton) {
 
         return
       }
+
 
       window.location.href =
         '/checkout.html'
@@ -622,6 +625,7 @@ window.addEventListener(
   () => {
 
     loadCartFromStorage()
+
 
     /*
      * Products already loaded hon to
@@ -655,6 +659,7 @@ window.addEventListener(
     ) {
 
       loadCartFromStorage()
+
 
       if (
         products.length > 0
