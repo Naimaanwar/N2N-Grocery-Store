@@ -598,7 +598,21 @@ app.post(
 
   }
 )
+app.get('/api/products', async (_req, res) => {
+  try {
+    const [rows] = await db.query(
+      'SELECT * FROM products ORDER BY id ASC'
+    )
 
+    res.json(rows)
+  } catch (error) {
+    console.error('Products fetch error:', error)
+
+    res.status(500).json({
+      message: 'Products fetch failed'
+    })
+  }
+})
 // =========================
 // GET ALL ORDERS
 // =========================
