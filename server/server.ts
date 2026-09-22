@@ -600,39 +600,146 @@ app.post(
 )
 
 // =========================
-// GET ALL PRODUCTS
+// GET ALL ORDERS
 // =========================
 
 app.get(
-  '/api/products',
+  '/api/orders',
   async (_req, res) => {
 
     try {
 
-      const [rows] =
-        await db.query(
-          'SELECT * FROM products ORDER BY id ASC'
-        )
+      const [rows] = await db.execute(`
+        SELECT
+          order_number AS orderNumber,
+          UNIX_TIMESTAMP(created_at) * 1000 AS createdAt,
+          UNIX_TIMESTAMP(last_updated) * 1000 AS lastUpdated,
+          name,
+          phone,
+          address,
+          city,
+          payment_method AS paymentMethod,
+          items,
+          total,
+          status,
+          locked
+        FROM orders
+        ORDER BY created_at DESC
+      `)
 
-      res.json(rows)
+      const orders = (rows as any[]).map(
+        (order) => {
+
+          let parsedItems: any[] = []
+
+          try {
+
+            if (
+              typeof order.items === 'string'
+            ) {
+
+              parsedItems =
+                JSON.parse(order.items)
+
+            } else if (
+              Array.isArray(order.items)
+            ) {
+
+              parsedItems =
+                order.items
+
+            } else if (
+              order.items
+            ) {
+
+              parsedItems =
+                JSON.parse(
+                  String(order.items)
+                )
+
+            }
+
+          } catch (parseError) {
+
+            console.error(
+              `Order items JSON error for ${order.orderNumber}:`,
+              parseError
+            )
+
+            parsedItems = []
+
+          }
+
+          return {
+
+            orderNumber:
+              order.orderNumber,
+
+            createdAt:
+              order.createdAt,
+
+            lastUpdated:
+              order.lastUpdated,
+
+            name:
+              order.name,
+
+            phone:
+              order.phone,
+
+            address:
+              order.address,
+
+            city:
+              order.city,
+
+            paymentMethod:
+              order.paymentMethod,
+
+            items:
+              parsedItems,
+
+            total:
+              Number(order.total || 0),
+
+            status:
+              order.status || 'Pending',
+
+            locked:
+              order.locked === 1 ||
+              order.locked === true
+
+          }
+
+        }
+      )
+
+      console.log(
+        `Orders fetched successfully: ${orders.length}`
+      )
+
+      return res.json(orders)
 
     } catch (error) {
 
       console.error(
-        'Products fetch error:',
+        'Error fetching orders:',
         error
       )
 
-      res.status(500).json({
+      return res.status(500).json({
+
+        success: false,
+
         message:
-          'Products fetch failed'
+          'Failed to fetch orders'
+
       })
 
     }
 
   }
 )
-
 // =========================
 // ADD NEW PRODUCT
 // =========================
