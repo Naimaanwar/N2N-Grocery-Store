@@ -11,6 +11,7 @@ let sendWhatsAppMessage: (
 const whatsapp = await import('./whatsapp')
 
 sendWhatsAppMessage = whatsapp.sendWhatsAppMessage
+
 const app = express()
 
 app.use(cors())
@@ -1545,6 +1546,7 @@ const PORT =
   )
 
 app.listen(
+  
   PORT,
   '0.0.0.0',
   () => {
@@ -1553,5 +1555,68 @@ app.listen(
       `Backend running on port ${PORT}`
     )
 
+  }
+)
+// =========================
+// WHATSAPP QR PAGE
+// =========================
+
+app.get(
+  '/whatsapp-qr',
+  (_req, res) => {
+
+    const qr =
+      whatsapp.getWhatsAppQR()
+
+    if (!qr) {
+
+      return res.status(404).send(
+        '<h2>WhatsApp QR is not available yet.</h2><p>Please wait and refresh.</p>'
+      )
+    }
+
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>N2N WhatsApp QR</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 30px;
+          }
+
+          img {
+            width: 350px;
+            max-width: 90%;
+          }
+
+          h1 {
+            margin-bottom: 10px;
+          }
+
+          p {
+            color: #555;
+          }
+        </style>
+      </head>
+
+      <body>
+
+        <h1>N2N Grocery Store</h1>
+
+        <p>WhatsApp QR Code</p>
+
+        <img src="${qr}" alt="WhatsApp QR Code">
+
+        <p>
+          WhatsApp → Linked Devices → Link a Device
+        </p>
+
+      </body>
+      </html>
+    `)
   }
 )
