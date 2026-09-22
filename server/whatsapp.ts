@@ -80,7 +80,6 @@ const client = new Client({
       '--disable-features=Translate,BackForwardCache',
       '--no-first-run',
       '--no-zygote',
-      '--single-process'
     ]
 
   }
