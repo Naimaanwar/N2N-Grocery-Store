@@ -79,7 +79,6 @@ const client = new Client({
       '--disable-renderer-backgrounding',
       '--disable-features=Translate,BackForwardCache',
       '--no-first-run',
-      '--no-zygote',
     ]
 
   }
