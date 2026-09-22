@@ -1,3 +1,4 @@
+
 import pkg from 'whatsapp-web.js'
 import qrcode from 'qrcode-terminal'
 import fs from 'fs'
@@ -61,6 +62,10 @@ const client = new Client({
 
     headless: true,
 
+    executablePath:
+      process.env.PUPPETEER_EXECUTABLE_PATH ||
+      undefined,
+
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -71,12 +76,14 @@ const client = new Client({
       '--disable-background-networking',
       '--disable-background-timer-throttling',
       '--disable-renderer-backgrounding',
-
-      '--disable-features=Translate,BackForwardCache,UseDnsHttpsSvcb,UseDnsHttpsSvcbAlpn',
-
-      '--host-resolver-rules=MAP web.whatsapp.com 57.144.149.32'
+      '--disable-features=Translate,BackForwardCache',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process'
     ]
+
   }
+
 })
 
 /*
