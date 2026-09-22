@@ -1,6 +1,7 @@
 
 import pkg from 'whatsapp-web.js'
 import qrcode from 'qrcode-terminal'
+import QRCode from 'qrcode'
 import fs from 'fs'
 import path from 'path'
 
@@ -89,17 +90,41 @@ const client = new Client({
 /*
  * QR
  */
-client.on('qr', (qr) => {
+let currentQR = ''
+
+client.on('qr', async (qr) => {
 
   console.log(
-    '\nScan this QR code with your WhatsApp:\n'
+    '\nNew WhatsApp QR code generated.'
   )
 
   qrcode.generate(
     qr,
     { small: true }
   )
+
+  try {
+
+    currentQR =
+      await QRCode.toDataURL(qr)
+
+    console.log(
+      'WhatsApp QR image is ready.'
+    )
+
+  } catch (error) {
+
+    console.error(
+      'QR image generation failed:',
+      error
+    )
+  }
 })
+
+export function getWhatsAppQR(): string {
+
+  return currentQR
+}
 
 /*
  * Authentication
