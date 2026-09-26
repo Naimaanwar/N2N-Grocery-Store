@@ -1641,7 +1641,207 @@ app.get(
 // CUSTOMER TRACKING + ADMIN DETAIL
 // PUBLIC ROUTE
 // ==================================================
+// ==================================================
+// GET MY ORDERS
+// CUSTOMER ORDERS ONLY
+// PUBLIC ROUTE
+// ==================================================
 
+app.get(
+  '/api/my-orders',
+  async (req, res) => {
+
+    try {
+
+      const phone =
+        String(req.query.phone || '').trim()
+
+      const name =
+        String(req.query.name || '').trim()
+
+      if (!phone && !name) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            'Customer information required'
+        })
+      }
+
+      let query = `
+        SELECT
+          order_number AS orderNumber,
+          UNIX_TIMESTAMP(created_at) * 1000 AS createdAt,
+          UNIX_TIMESTAMP(last_updated) * 1000 AS lastUpdated,
+          name,
+          phone,
+          address,
+          city,
+          payment_method AS paymentMethod,
+          items,
+          total,
+          status,
+          locked
+        FROM orders
+        WHERE
+          phone = ?
+      `
+
+      const params: any[] = [phone]
+
+      if (!phone && name) {
+
+        query = `
+          SELECT
+            order_number AS orderNumber,
+            UNIX_TIMESTAMP(created_at) * 1000 AS createdAt,
+            UNIX_TIMESTAMP(last_updated) * 1000 AS lastUpdated,
+            name,
+            phone,
+            address,
+            city,
+            payment_method AS paymentMethod,
+            items,
+            total,
+            status,
+            locked
+          FROM orders
+          WHERE LOWER(name) = LOWER(?)
+        `
+
+        params.length = 0
+        params.push(name)
+      }
+
+      query += `
+        ORDER BY created_at DESC
+      `
+
+      const [rows] =
+        await db.execute(
+          query,
+          params
+        )
+
+      const orders =
+        (rows as any[]).map(
+          (order) => {
+
+            let parsedItems: any[] = []
+
+            try {
+
+              if (
+                typeof order.items ===
+                'string'
+              ) {
+
+                parsedItems =
+                  JSON.parse(
+                    order.items
+                  )
+
+              } else if (
+                Array.isArray(
+                  order.items
+                )
+              ) {
+
+                parsedItems =
+                  order.items
+
+              } else if (
+                order.items
+              ) {
+
+                parsedItems =
+                  JSON.parse(
+                    String(
+                      order.items
+                    )
+                  )
+              }
+
+            } catch (parseError) {
+
+              console.error(
+                `Order items JSON error for ${order.orderNumber}:`,
+                parseError
+              )
+
+              parsedItems = []
+            }
+
+            return {
+
+              orderNumber:
+                order.orderNumber,
+
+              createdAt:
+                order.createdAt,
+
+              lastUpdated:
+                order.lastUpdated,
+
+              name:
+                order.name,
+
+              phone:
+                order.phone,
+
+              address:
+                order.address,
+
+              city:
+                order.city,
+
+              paymentMethod:
+                order.paymentMethod,
+
+              items:
+                parsedItems,
+
+              total:
+                Number(
+                  order.total || 0
+                ),
+
+              status:
+                order.status ||
+                'Pending',
+
+              locked:
+                order.locked === 1 ||
+                order.locked === true
+            }
+          }
+        )
+
+      console.log(
+        `Customer orders fetched: ${orders.length}`
+      )
+
+      return res.json(orders)
+
+    } catch (error) {
+
+      console.error(
+        'Error fetching customer orders:',
+        error
+      )
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          'Failed to fetch customer orders'
+      })
+    }
+  }
+)
 app.get(
   '/api/orders/:orderNumber',
   async (req, res) => {

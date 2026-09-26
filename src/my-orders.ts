@@ -505,9 +505,13 @@ modal.addEventListener(
 async function loadMyOrders() {
   try {
     const response =
-      await fetch(
-        `${API_URL}/api/orders`
-      )
+  await fetch(
+    `${API_URL}/api/my-orders?phone=${encodeURIComponent(
+      user.phone || ''
+    )}&name=${encodeURIComponent(
+      user.name || ''
+    )}`
+  )
 
     if (!response.ok) {
       throw new Error(
