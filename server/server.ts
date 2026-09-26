@@ -1,8 +1,15 @@
+import 'dotenv/config'
+import crypto from 'crypto'
 import express from 'express'
 import cors from 'cors'
 import mysql from 'mysql2/promise'
 import fs from 'fs'
 import path from 'path'
+
+// ==================================================
+// WHATSAPP
+// ==================================================
+
 let sendWhatsAppMessage: (
   phone: string,
   message: string
@@ -10,15 +17,16 @@ let sendWhatsAppMessage: (
 
 const whatsapp = await import('./whatsapp')
 
-sendWhatsAppMessage = whatsapp.sendWhatsAppMessage
+sendWhatsAppMessage =
+  whatsapp.sendWhatsAppMessage
+
+// ==================================================
+// EXPRESS
+// ==================================================
 
 const app = express()
 
 app.use(cors())
-
-// =========================
-// JSON LIMIT
-// =========================
 
 app.use(
   express.json({
@@ -26,9 +34,9 @@ app.use(
   })
 )
 
-// =========================
+// ==================================================
 // PRODUCT IMAGE FOLDER
-// =========================
+// ==================================================
 
 const productImagesDir = path.join(
   process.cwd(),
@@ -36,22 +44,25 @@ const productImagesDir = path.join(
   'product-images'
 )
 
-fs.mkdirSync(productImagesDir, {
-  recursive: true
-})
+fs.mkdirSync(
+  productImagesDir,
+  {
+    recursive: true
+  }
+)
 
-// =========================
+// ==================================================
 // SERVE PRODUCT IMAGES
-// =========================
+// ==================================================
 
 app.use(
   '/product-images',
   express.static(productImagesDir)
 )
 
-// =========================
+// ==================================================
 // SERVE VITE FRONTEND
-// =========================
+// ==================================================
 
 const distDir = path.join(
   process.cwd(),
@@ -62,28 +73,34 @@ app.use(
   express.static(distDir)
 )
 
-// =========================
+// ==================================================
 // SAVE PRODUCT IMAGE
-// =========================
+// ==================================================
 
 function saveProductImage(
   imageData: string,
   imageName: string
 ): string {
 
-  const match = imageData.match(
-    /^data:image\/(png|jpeg|jpg|webp);base64,(.+)$/
-  )
+  const match =
+    imageData.match(
+      /^data:image\/(png|jpeg|jpg|webp);base64,(.+)$/
+    )
 
   if (!match) {
-    throw new Error('Invalid image format')
+    throw new Error(
+      'Invalid image format'
+    )
   }
 
-  const imageType = match[1].toLowerCase()
+  const imageType =
+    match[1].toLowerCase()
 
-  const base64Data = match[2]
+  const base64Data =
+    match[2]
 
-  let extension = imageType
+  let extension =
+    imageType
 
   if (
     imageType === 'jpeg' ||
@@ -92,26 +109,34 @@ function saveProductImage(
     extension = 'jpg'
   }
 
-  const originalName = path.basename(
-    imageName || 'product'
-  )
+  const originalName =
+    path.basename(
+      imageName || 'product'
+    )
 
   const nameWithoutExtension =
     originalName
       .replace(/\.[^/.]+$/, '')
-      .replace(/[^a-zA-Z0-9_-]/g, '-')
+      .replace(
+        /[^a-zA-Z0-9_-]/g,
+        '-'
+      )
 
   const fileName =
     `${Date.now()}-${nameWithoutExtension}.${extension}`
 
-  const filePath = path.join(
-    productImagesDir,
-    fileName
-  )
+  const filePath =
+    path.join(
+      productImagesDir,
+      fileName
+    )
 
   fs.writeFileSync(
     filePath,
-    Buffer.from(base64Data, 'base64')
+    Buffer.from(
+      base64Data,
+      'base64'
+    )
   )
 
   console.log(
@@ -121,38 +146,44 @@ function saveProductImage(
   return `/product-images/${fileName}`
 }
 
-// =========================
+// ==================================================
 // MYSQL CONNECTION
-// =========================
+// ==================================================
 
-const db = mysql.createPool({
+const db =
+  mysql.createPool({
 
-  host: process.env.DB_HOST,
+    host:
+      process.env.DB_HOST,
 
-  user: process.env.DB_USER,
+    user:
+      process.env.DB_USER,
 
-  password: process.env.DB_PASSWORD,
+    password:
+      process.env.DB_PASSWORD,
 
-  database: process.env.DB_NAME,
+    database:
+      process.env.DB_NAME,
 
-  port: Number(
-    process.env.DB_PORT || 3306
-  ),
+    port:
+      Number(
+        process.env.DB_PORT || 3306
+      ),
 
-  ssl: {
-  rejectUnauthorized: false
-},
-  waitForConnections: true,
+    ssl: {
+      rejectUnauthorized: false
+    },
 
-  connectionLimit: 10,
+    waitForConnections: true,
 
-  queueLimit: 0
+    connectionLimit: 10,
 
-})
+    queueLimit: 0
+  })
 
-// =========================
+// ==================================================
 // TEST DATABASE CONNECTION
-// =========================
+// ==================================================
 
 async function testDatabase() {
 
@@ -165,6 +196,24 @@ async function testDatabase() {
       'MySQL Database Connected Successfully!'
     )
 
+    // ==================================================
+    // ADMIN LICENSE TABLE
+    // ==================================================
+
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS admin_license (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        license_key VARCHAR(100) NOT NULL,
+        start_date DATETIME NOT NULL,
+        expiry_date DATETIME NOT NULL,
+        active BOOLEAN DEFAULT TRUE
+      )
+    `)
+
+    console.log(
+      'Admin license table ready!'
+    )
+
     connection.release()
 
   } catch (error) {
@@ -173,15 +222,76 @@ async function testDatabase() {
       'MySQL Connection Failed:',
       error
     )
-
   }
-
 }
 
 testDatabase()
 
 // ==================================================
+// ADMIN SESSION STORAGE
+// ==================================================
+
+const adminSessions =
+  new Set<string>()
+
+// ==================================================
+// ADMIN SESSION VERIFICATION
+// ==================================================
+
+function requireAdminSession(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
+
+  const authorization =
+    req.headers.authorization
+
+  if (
+    !authorization ||
+    !authorization.startsWith(
+      'Bearer '
+    )
+  ) {
+
+    return res.status(401).json({
+
+      success: false,
+
+      message:
+        'Admin session required'
+
+    })
+
+  }
+
+  const token =
+    authorization.substring(
+      7
+    ).trim()
+
+  if (
+    !token ||
+    !adminSessions.has(token)
+  ) {
+
+    return res.status(401).json({
+
+      success: false,
+
+      message:
+        'Invalid or expired admin session'
+
+    })
+
+  }
+
+  next()
+}
+
+// ==================================================
 // CREATE NEW ORDER + UPDATE STOCK
+// CUSTOMER PUBLIC ROUTE
 // ==================================================
 
 app.post(
@@ -193,11 +303,12 @@ app.post(
 
     try {
 
-      const order = req.body
+      const order =
+        req.body
 
-      // =========================
+      // ==================================================
       // GENERATE ORDER NUMBER
-      // =========================
+      // ==================================================
 
       const [lastOrderRows] =
         await db.execute(`
@@ -216,11 +327,14 @@ app.post(
 
       let nextNumber = 1
 
-      if (lastOrders.length > 0) {
+      if (
+        lastOrders.length > 0
+      ) {
 
         const lastOrderNumber =
           String(
-            lastOrders[0].order_number
+            lastOrders[0]
+              .order_number
           )
 
         const lastNumber =
@@ -232,22 +346,26 @@ app.post(
             10
           )
 
-        if (!isNaN(lastNumber)) {
+        if (
+          !isNaN(lastNumber)
+        ) {
+
           nextNumber =
             lastNumber + 1
         }
-
       }
 
       const orderNumber =
-        `N2N-${String(nextNumber).padStart(6, '0')}`
+        `N2N-${String(
+          nextNumber
+        ).padStart(6, '0')}`
 
       order.orderNumber =
         orderNumber
 
-      // =========================
+      // ==================================================
       // VALIDATION
-      // =========================
+      // ==================================================
 
       if (
         !order.name ||
@@ -255,7 +373,9 @@ app.post(
         !order.address ||
         !order.city ||
         !order.items ||
-        !Array.isArray(order.items)
+        !Array.isArray(
+          order.items
+        )
       ) {
 
         connection.release()
@@ -265,18 +385,17 @@ app.post(
           message:
             'Required order information missing'
         })
-
       }
 
-      // =========================
+      // ==================================================
       // START TRANSACTION
-      // =========================
+      // ==================================================
 
       await connection.beginTransaction()
 
-      // =========================
+      // ==================================================
       // CHECK STOCK
-      // =========================
+      // ==================================================
 
       for (
         const item of order.items
@@ -286,7 +405,9 @@ app.post(
           item.id
 
         const quantity =
-          Number(item.quantity)
+          Number(
+            item.quantity
+          )
 
         if (
           !productCode ||
@@ -296,7 +417,6 @@ app.post(
           throw new Error(
             'Invalid product or quantity'
           )
-
         }
 
         const [productRows] =
@@ -316,33 +436,33 @@ app.post(
         const products =
           productRows as any[]
 
-        if (products.length === 0) {
+        if (
+          products.length === 0
+        ) {
 
           throw new Error(
             `Product not found: ${productCode}`
           )
-
         }
 
         const product =
           products[0]
 
         if (
-          Number(product.stock) <
-          quantity
+          Number(
+            product.stock
+          ) < quantity
         ) {
 
           throw new Error(
             `${product.name} has only ${product.stock} item(s) available.`
           )
-
         }
-
       }
 
-      // =========================
+      // ==================================================
       // SAVE ORDER
-      // =========================
+      // ==================================================
 
       const sql = `
         INSERT INTO orders
@@ -379,9 +499,9 @@ app.post(
         ]
       )
 
-      // =========================
+      // ==================================================
       // REDUCE STOCK
-      // =========================
+      // ==================================================
 
       for (
         const item of order.items
@@ -394,16 +514,17 @@ app.post(
           WHERE product_code = ?
           `,
           [
-            Number(item.quantity),
+            Number(
+              item.quantity
+            ),
             item.id
           ]
         )
-
       }
 
-      // =========================
+      // ==================================================
       // COMPLETE TRANSACTION
-      // =========================
+      // ==================================================
 
       await connection.commit()
 
@@ -441,7 +562,9 @@ app.post(
         .then(
           (whatsappSent) => {
 
-            if (whatsappSent) {
+            if (
+              whatsappSent
+            ) {
 
               console.log(
                 `WhatsApp CUSTOMER message sent for ${order.orderNumber} ✅`
@@ -452,9 +575,7 @@ app.post(
               console.log(
                 `WhatsApp CUSTOMER message failed for ${order.orderNumber} ❌`
               )
-
             }
-
           }
         )
         .catch(
@@ -464,20 +585,15 @@ app.post(
               `Customer WhatsApp error for ${order.orderNumber}:`,
               error
             )
-
           }
         )
 
       // ==================================================
-      // ADMIN WHATSAPP NOTIFICATION
+      // ADMIN WHATSAPP
       // ==================================================
 
       const adminWhatsAppNumber =
         '923206453229'
-
-      console.log(
-        `Preparing WhatsApp ADMIN message for ${adminWhatsAppNumber}...`
-      )
 
       const orderItems =
         order.items
@@ -492,7 +608,6 @@ app.post(
               return (
                 `• ${itemName} × ${item.quantity}`
               )
-
             }
           )
           .join('\n')
@@ -521,7 +636,9 @@ app.post(
         .then(
           (adminWhatsAppSent) => {
 
-            if (adminWhatsAppSent) {
+            if (
+              adminWhatsAppSent
+            ) {
 
               console.log(
                 `WhatsApp ADMIN notification sent for ${order.orderNumber} ✅`
@@ -532,9 +649,7 @@ app.post(
               console.log(
                 `WhatsApp ADMIN notification failed for ${order.orderNumber} ❌`
               )
-
             }
-
           }
         )
         .catch(
@@ -544,13 +659,12 @@ app.post(
               `ADMIN WhatsApp error for ${order.orderNumber}:`,
               error
             )
-
           }
         )
 
-      // =========================
+      // ==================================================
       // IMMEDIATE RESPONSE
-      // =========================
+      // ==================================================
 
       return res.status(201).json({
 
@@ -561,19 +675,14 @@ app.post(
 
         orderNumber:
           order.orderNumber
-
       })
 
     } catch (error) {
 
       try {
-
         await connection.rollback()
-
       } catch {
-
         // Ignore rollback error
-
       }
 
       connection.release()
@@ -591,153 +700,124 @@ app.post(
           error instanceof Error
             ? error.message
             : 'Failed to place order'
-
       })
-
     }
-
   }
 )
-app.get('/api/products', async (_req, res) => {
-  try {
-    const [rows] = await db.query(
-      'SELECT * FROM products ORDER BY id ASC'
-    )
 
-    res.json(rows)
-  } catch (error) {
-    console.error('Products fetch error:', error)
+// ==================================================
+// ACTIVATE ADMIN LICENSE
+// PUBLIC LICENSE ROUTE
+// ==================================================
 
-    res.status(500).json({
-      message: 'Products fetch failed'
-    })
-  }
-})
-// =========================
-// GET ALL ORDERS
-// =========================
-
-app.get(
-  '/api/orders',
-  async (_req, res) => {
+app.post(
+  '/api/admin/activate-license',
+  async (req, res) => {
 
     try {
 
-      const [rows] = await db.execute(`
-        SELECT
-          order_number AS orderNumber,
-          UNIX_TIMESTAMP(created_at) * 1000 AS createdAt,
-          UNIX_TIMESTAMP(last_updated) * 1000 AS lastUpdated,
-          name,
-          phone,
-          address,
-          city,
-          payment_method AS paymentMethod,
-          items,
-          total,
-          status,
-          locked
-        FROM orders
-        ORDER BY created_at DESC
+      const {
+        licenseKey
+      } = req.body
+
+      if (
+        licenseKey !==
+        'N2N-2026-ADMIN-1YEAR'
+      ) {
+
+        return res.status(400).json({
+          success: false,
+          message:
+            'Invalid license key'
+        })
+      }
+
+      const now = new Date()
+
+      // Check existing active license
+      const [existingRows] =
+        await db.query(`
+          SELECT expiry_date
+          FROM admin_license
+          WHERE active = TRUE
+          ORDER BY id DESC
+          LIMIT 1
+        `)
+
+      const existingLicenses =
+        existingRows as any[]
+
+      let startDate = now
+
+      // Agar current license abhi active hai,
+      // renewal current expiry ke baad start hogi.
+      if (
+        existingLicenses.length > 0
+      ) {
+
+        const currentExpiry =
+          new Date(
+            existingLicenses[0].expiry_date
+          )
+
+        if (
+          currentExpiry > now
+        ) {
+
+          startDate =
+            currentExpiry
+        }
+      }
+
+      const expiryDate =
+        new Date(
+          startDate
+        )
+
+      expiryDate.setFullYear(
+        expiryDate.getFullYear() + 1
+      )
+
+      // Deactivate old licenses
+      await db.query(`
+        UPDATE admin_license
+        SET active = FALSE
+        WHERE active = TRUE
       `)
 
-      const orders = (rows as any[]).map(
-        (order) => {
-
-          let parsedItems: any[] = []
-
-          try {
-
-            if (
-              typeof order.items === 'string'
-            ) {
-
-              parsedItems =
-                JSON.parse(order.items)
-
-            } else if (
-              Array.isArray(order.items)
-            ) {
-
-              parsedItems =
-                order.items
-
-            } else if (
-              order.items
-            ) {
-
-              parsedItems =
-                JSON.parse(
-                  String(order.items)
-                )
-
-            }
-
-          } catch (parseError) {
-
-            console.error(
-              `Order items JSON error for ${order.orderNumber}:`,
-              parseError
-            )
-
-            parsedItems = []
-
-          }
-
-          return {
-
-            orderNumber:
-              order.orderNumber,
-
-            createdAt:
-              order.createdAt,
-
-            lastUpdated:
-              order.lastUpdated,
-
-            name:
-              order.name,
-
-            phone:
-              order.phone,
-
-            address:
-              order.address,
-
-            city:
-              order.city,
-
-            paymentMethod:
-              order.paymentMethod,
-
-            items:
-              parsedItems,
-
-            total:
-              Number(order.total || 0),
-
-            status:
-              order.status || 'Pending',
-
-            locked:
-              order.locked === 1 ||
-              order.locked === true
-
-          }
-
-        }
+      // Add new license
+      await db.query(
+        `
+        INSERT INTO admin_license
+        (
+          license_key,
+          start_date,
+          expiry_date,
+          active
+        )
+        VALUES (?, ?, ?, TRUE)
+        `,
+        [
+          licenseKey,
+          startDate,
+          expiryDate
+        ]
       )
 
-      console.log(
-        `Orders fetched successfully: ${orders.length}`
-      )
+      return res.json({
 
-      return res.json(orders)
+        success: true,
+
+        message:
+          'License activated successfully',
+
+        expiryDate
+      })
 
     } catch (error) {
 
       console.error(
-        'Error fetching orders:',
+        'License activation error:',
         error
       )
 
@@ -746,7 +826,146 @@ app.get(
         success: false,
 
         message:
-          'Failed to fetch orders'
+          'License activation failed'
+      })
+    }
+  }
+)
+
+// ==================================================
+// GET ADMIN LICENSE STATUS
+// PUBLIC LICENSE STATUS ROUTE
+// ==================================================
+
+app.get(
+  '/api/admin/license-status',
+  async (_req, res) => {
+
+    try {
+
+      const [licenseRows] =
+        await db.query(`
+          SELECT
+            id,
+            license_key,
+            start_date,
+            expiry_date,
+            active
+          FROM admin_license
+          ORDER BY id DESC
+          LIMIT 1
+        `)
+
+      const licenses =
+        licenseRows as any[]
+
+      // No license found
+      if (
+        licenses.length === 0
+      ) {
+
+        return res.json({
+          success: false,
+          active: false,
+          message:
+            'Admin license is not activated'
+        })
+
+      }
+
+      const license =
+        licenses[0]
+
+      const now =
+        new Date()
+
+      const expiryDate =
+        new Date(
+          license.expiry_date
+        )
+
+      // Calculate remaining time
+      const difference =
+        expiryDate.getTime() -
+        now.getTime()
+
+      const remainingDays =
+        Math.max(
+          0,
+          Math.ceil(
+            difference /
+            (1000 * 60 * 60 * 24)
+          )
+        )
+
+      // License expired
+      if (
+        difference <= 0
+      ) {
+
+        await db.query(
+          `
+          UPDATE admin_license
+          SET active = FALSE
+          WHERE id = ?
+          `,
+          [license.id]
+        )
+
+        return res.json({
+
+          success: true,
+
+          active: false,
+
+          expired: true,
+
+          remainingDays: 0,
+
+          expiryDate:
+            license.expiry_date,
+
+          message:
+            'Admin license has expired'
+
+        })
+
+      }
+
+      // License active
+      return res.json({
+
+        success: true,
+
+        active:
+          license.active === 1 ||
+          license.active === true,
+
+        expired: false,
+
+        remainingDays,
+
+        startDate:
+          license.start_date,
+
+        expiryDate:
+          license.expiry_date
+
+      })
+
+    } catch (error) {
+
+      console.error(
+        'License status error:',
+        error
+      )
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          'Could not check license status'
 
       })
 
@@ -754,12 +973,211 @@ app.get(
 
   }
 )
-// =========================
-// ADD NEW PRODUCT
-// =========================
+
+// ==================================================
+// ADMIN LOGIN
+// PUBLIC LOGIN ROUTE
+// ==================================================
+
+app.post(
+  '/api/admin/login',
+  async (req, res) => {
+
+    try {
+
+      const {
+        username,
+        password
+      } = req.body
+
+      // ==================================================
+      // CHECK USERNAME + PASSWORD
+      // ==================================================
+
+      if (
+        username !== 'admin' ||
+        password !== 'N2N@Admin123'
+      ) {
+
+        return res.status(401).json({
+
+          success: false,
+
+          message:
+            'Invalid username or password'
+        })
+      }
+
+      // ==================================================
+      // GET ACTIVE LICENSE
+      // ==================================================
+
+      const [licenseRows] =
+        await db.query(`
+          SELECT
+            id,
+            license_key,
+            start_date,
+            expiry_date,
+            active
+          FROM admin_license
+          WHERE active = TRUE
+          ORDER BY id DESC
+          LIMIT 1
+        `)
+
+      const licenses =
+        licenseRows as any[]
+
+      // ==================================================
+      // NO LICENSE
+      // ==================================================
+
+      if (
+        licenses.length === 0
+      ) {
+
+        return res.status(403).json({
+
+          success: false,
+
+          message:
+            'Admin license is not activated'
+        })
+      }
+
+      const license =
+        licenses[0]
+
+      // ==================================================
+      // CHECK EXPIRY
+      // ==================================================
+
+      const now =
+        new Date()
+
+      const expiryDate =
+        new Date(
+          license.expiry_date
+        )
+
+      if (
+        now >= expiryDate
+      ) {
+
+        // Automatically deactivate expired license
+        await db.query(
+          `
+          UPDATE admin_license
+          SET active = FALSE
+          WHERE id = ?
+          `,
+          [license.id]
+        )
+
+        return res.status(403).json({
+
+          success: false,
+
+          message:
+            'Admin license has expired'
+        })
+      }
+
+      // ==================================================
+      // CREATE SECURE SESSION TOKEN
+      // ==================================================
+
+      const sessionToken =
+        crypto
+          .randomBytes(32)
+          .toString('hex')
+
+      adminSessions.add(
+        sessionToken
+      )
+
+      // ==================================================
+      // LOGIN SUCCESS
+      // ==================================================
+
+      return res.json({
+
+        success: true,
+
+        message:
+          'Admin login successful',
+
+        expiryDate:
+          license.expiry_date,
+
+        sessionToken
+      })
+
+    } catch (error) {
+
+      console.error(
+        'Admin login error:',
+        error
+      )
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          'Admin login failed'
+      })
+    }
+  }
+)
+
+// ==================================================
+// GET PRODUCTS
+// CUSTOMER + ADMIN PUBLIC READ ROUTE
+// ==================================================
+
+app.get(
+  '/api/products',
+  async (_req, res) => {
+
+    try {
+
+      const [rows] =
+        await db.query(
+          `
+          SELECT *
+          FROM products
+          ORDER BY id ASC
+          `
+        )
+
+      res.json(rows)
+
+    } catch (error) {
+
+      console.error(
+        'Products fetch error:',
+        error
+      )
+
+      res.status(500).json({
+
+        message:
+          'Products fetch failed'
+      })
+    }
+  }
+)
+
+// ==================================================
+// ADD PRODUCT
+// ADMIN ONLY
+// ==================================================
 
 app.post(
   '/api/products',
+  requireAdminSession,
   async (req, res) => {
 
     try {
@@ -775,10 +1193,6 @@ app.post(
         unit
       } = req.body
 
-      // =========================
-      // VALIDATION
-      // =========================
-
       if (
         !name ||
         price === undefined ||
@@ -787,15 +1201,11 @@ app.post(
       ) {
 
         return res.status(400).json({
+
           message:
             'Required product fields missing'
         })
-
       }
-
-      // =========================
-      // SAVE IMAGE
-      // =========================
 
       let savedImage = ''
 
@@ -809,24 +1219,17 @@ app.post(
         savedImage =
           saveProductImage(
             String(image),
-            String(imageName || 'product')
+            String(
+              imageName ||
+              'product'
+            )
           )
 
       } else {
 
         savedImage =
           image || ''
-
       }
-
-      console.log(
-        'Product image path:',
-        savedImage
-      )
-
-      // =========================
-      // INSERT PRODUCT
-      // =========================
 
       const [result] =
         await db.query(
@@ -853,10 +1256,6 @@ app.post(
             unit || ''
           ]
         )
-
-      // =========================
-      // SUCCESS RESPONSE
-      // =========================
 
       return res.status(201).json({
 
@@ -885,9 +1284,7 @@ app.post(
 
           unit:
             unit || ''
-
         }
-
       })
 
     } catch (error) {
@@ -903,26 +1300,26 @@ app.post(
           error instanceof Error
             ? error.message
             : 'Product add failed'
-
       })
-
     }
-
   }
 )
 
-// =========================
+// ==================================================
 // UPDATE PRODUCT
-// =========================
+// ADMIN ONLY
+// ==================================================
 
 app.put(
   '/api/products/:id',
+  requireAdminSession,
   async (req, res) => {
 
     try {
 
-      const { id } =
-        req.params
+      const {
+        id
+      } = req.params
 
       const {
         name,
@@ -941,15 +1338,11 @@ app.put(
       ) {
 
         return res.status(400).json({
+
           message:
             'Required product fields missing'
         })
-
       }
-
-      // =========================
-      // GET CURRENT PRODUCT
-      // =========================
 
       const [existingRows] =
         await db.query(
@@ -970,18 +1363,15 @@ app.put(
       ) {
 
         return res.status(404).json({
+
           message:
             'Product not found'
         })
-
       }
 
       const oldImage =
-        existingProducts[0].image || ''
-
-      // =========================
-      // IMAGE DECISION
-      // =========================
+        existingProducts[0].image ||
+        ''
 
       let savedImage =
         oldImage
@@ -996,14 +1386,12 @@ app.put(
         savedImage =
           saveProductImage(
             String(image),
-            String(imageName || 'product')
+            String(
+              imageName ||
+              'product'
+            )
           )
-
       }
-
-      // =========================
-      // UPDATE PRODUCT
-      // =========================
 
       await db.query(
         `
@@ -1035,7 +1423,6 @@ app.put(
 
         image:
           savedImage
-
       })
 
     } catch (error) {
@@ -1051,26 +1438,26 @@ app.put(
           error instanceof Error
             ? error.message
             : 'Product update failed'
-
       })
-
     }
-
   }
 )
 
-// =========================
+// ==================================================
 // DELETE PRODUCT
-// =========================
+// ADMIN ONLY
+// ==================================================
 
 app.delete(
   '/api/products/:id',
+  requireAdminSession,
   async (req, res) => {
 
     try {
 
-      const { id } =
-        req.params
+      const {
+        id
+      } = req.params
 
       await db.query(
         'DELETE FROM products WHERE id = ?',
@@ -1081,7 +1468,6 @@ app.delete(
 
         message:
           'Product deleted successfully'
-
       })
 
     } catch (error) {
@@ -1095,20 +1481,19 @@ app.delete(
 
         message:
           'Product delete failed'
-
       })
-
     }
-
   }
 )
 
-// =========================
+// ==================================================
 // GET ALL ORDERS
-// =========================
+// ADMIN ONLY
+// ==================================================
 
 app.get(
   '/api/orders',
+  requireAdminSession,
   async (_req, res) => {
 
     try {
@@ -1133,21 +1518,105 @@ app.get(
         `)
 
       const orders =
-        (rows as any[])
-          .map(
-            order => ({
+        (rows as any[]).map(
+          (order) => {
 
-              ...order,
+            let parsedItems: any[] =
+              []
+
+            try {
+
+              if (
+                typeof order.items ===
+                'string'
+              ) {
+
+                parsedItems =
+                  JSON.parse(
+                    order.items
+                  )
+
+              } else if (
+                Array.isArray(
+                  order.items
+                )
+              ) {
+
+                parsedItems =
+                  order.items
+
+              } else if (
+                order.items
+              ) {
+
+                parsedItems =
+                  JSON.parse(
+                    String(
+                      order.items
+                    )
+                  )
+              }
+
+            } catch (parseError) {
+
+              console.error(
+                `Order items JSON error for ${order.orderNumber}:`,
+                parseError
+              )
+
+              parsedItems = []
+            }
+
+            return {
+
+              orderNumber:
+                order.orderNumber,
+
+              createdAt:
+                order.createdAt,
+
+              lastUpdated:
+                order.lastUpdated,
+
+              name:
+                order.name,
+
+              phone:
+                order.phone,
+
+              address:
+                order.address,
+
+              city:
+                order.city,
+
+              paymentMethod:
+                order.paymentMethod,
 
               items:
-                typeof order.items === 'string'
-                  ? JSON.parse(order.items)
-                  : order.items
+                parsedItems,
 
-            })
-          )
+              total:
+                Number(
+                  order.total || 0
+                ),
 
-      res.json(orders)
+              status:
+                order.status ||
+                'Pending',
+
+              locked:
+                order.locked === 1 ||
+                order.locked === true
+            }
+          }
+        )
+
+      console.log(
+        `Orders fetched successfully: ${orders.length}`
+      )
+
+      return res.json(orders)
 
     } catch (error) {
 
@@ -1156,23 +1625,22 @@ app.get(
         error
       )
 
-      res.status(500).json({
+      return res.status(500).json({
 
         success: false,
 
         message:
           'Failed to fetch orders'
-
       })
-
     }
-
   }
 )
 
-// =========================
+// ==================================================
 // GET SINGLE ORDER
-// =========================
+// CUSTOMER TRACKING + ADMIN DETAIL
+// PUBLIC ROUTE
+// ==================================================
 
 app.get(
   '/api/orders/:orderNumber',
@@ -1219,9 +1687,7 @@ app.get(
 
           message:
             'Order not found'
-
         })
-
       }
 
       const order = {
@@ -1229,12 +1695,12 @@ app.get(
         ...result[0],
 
         items:
-          typeof result[0].items === 'string'
+          typeof result[0].items ===
+          'string'
             ? JSON.parse(
                 result[0].items
               )
             : result[0].items
-
       }
 
       res.json({
@@ -1242,7 +1708,6 @@ app.get(
         success: true,
 
         order
-
       })
 
     } catch (error) {
@@ -1258,20 +1723,19 @@ app.get(
 
         message:
           'Failed to fetch order'
-
       })
-
     }
-
   }
 )
 
-// =========================
+// ==================================================
 // UPDATE ORDER / LOCK / UNLOCK
-// =========================
+// ADMIN ONLY
+// ==================================================
 
 app.patch(
   '/api/orders/:orderNumber',
+  requireAdminSession,
   async (req, res) => {
 
     try {
@@ -1285,9 +1749,9 @@ app.patch(
       const locked =
         req.body.locked
 
-      // =========================
+      // ==================================================
       // GET CURRENT ORDER
-      // =========================
+      // ==================================================
 
       const [rows] =
         await db.execute(
@@ -1313,17 +1777,15 @@ app.patch(
 
           message:
             'Order not found'
-
         })
-
       }
 
       const currentOrder =
         result[0]
 
-      // =========================
+      // ==================================================
       // UNLOCK
-      // =========================
+      // ==================================================
 
       if (
         locked === false
@@ -1348,14 +1810,12 @@ app.patch(
 
           message:
             'Order unlocked successfully'
-
         })
-
       }
 
-      // =========================
+      // ==================================================
       // BLOCK LOCKED ORDER
-      // =========================
+      // ==================================================
 
       if (
         currentOrder.locked === 1 ||
@@ -1368,22 +1828,20 @@ app.patch(
 
           message:
             'This order is locked and cannot be changed.'
-
         })
-
       }
 
-      // =========================
+      // ==================================================
       // CHECK STATUS CHANGE
-      // =========================
+      // ==================================================
 
       const statusChanged =
         status !== undefined &&
         status !== currentOrder.status
 
-      // =========================
+      // ==================================================
       // UPDATE STATUS / LOCK
-      // =========================
+      // ==================================================
 
       if (
         status !== undefined &&
@@ -1434,12 +1892,11 @@ app.patch(
             orderNumber
           ]
         )
-
       }
 
-      // =========================
+      // ==================================================
       // WHATSAPP STATUS MESSAGE
-      // =========================
+      // ==================================================
 
       if (
         statusChanged
@@ -1521,12 +1978,11 @@ app.patch(
             `Your order #${orderNumber} has been Cancelled.\n\n` +
             `If you have any questions, please contact us.\n\n` +
             `Thank you.`
-
         }
 
-        // =========================
+        // ==================================================
         // SEND CUSTOMER STATUS MESSAGE
-        // =========================
+        // ==================================================
 
         if (
           message
@@ -1556,9 +2012,7 @@ app.patch(
                   console.log(
                     `WhatsApp status message failed for ${orderNumber} ❌`
                   )
-
                 }
-
               }
             )
             .catch(
@@ -1568,17 +2022,14 @@ app.patch(
                   `WhatsApp status error for ${orderNumber}:`,
                   error
                 )
-
               }
             )
-
         }
-
       }
 
-      // =========================
+      // ==================================================
       // GET UPDATED ORDER
-      // =========================
+      // ==================================================
 
       const [updatedRows] =
         await db.execute(
@@ -1611,12 +2062,12 @@ app.patch(
         ...updatedResult[0],
 
         items:
-          typeof updatedResult[0].items === 'string'
+          typeof updatedResult[0].items ===
+          'string'
             ? JSON.parse(
                 updatedResult[0].items
               )
             : updatedResult[0].items
-
       }
 
       console.log(
@@ -1633,7 +2084,6 @@ app.patch(
 
         order:
           updatedOrder
-
       })
 
     } catch (error) {
@@ -1649,17 +2099,14 @@ app.patch(
 
         message:
           'Failed to update order'
-
       })
-
     }
-
   }
 )
 
-// =========================
+// ==================================================
 // START SERVER
-// =========================
+// ==================================================
 
 const PORT =
   Number(
@@ -1667,7 +2114,6 @@ const PORT =
   )
 
 app.listen(
-  
   PORT,
   '0.0.0.0',
   () => {
@@ -1675,12 +2121,12 @@ app.listen(
     console.log(
       `Backend running on port ${PORT}`
     )
-
   }
 )
-// =========================
+
+// ==================================================
 // WHATSAPP QR PAGE
-// =========================
+// ==================================================
 
 app.get(
   '/whatsapp-qr',
@@ -1706,14 +2152,15 @@ app.get(
       if (qr) {
 
         return res.send(`
-
           <!DOCTYPE html>
 
           <html>
 
           <head>
 
-            <title>N2N WhatsApp QR</title>
+            <title>
+              N2N WhatsApp QR
+            </title>
 
             <meta
               name="viewport"
@@ -1723,55 +2170,35 @@ app.get(
             <style>
 
               body {
-
                 font-family: Arial, sans-serif;
-
                 text-align: center;
-
                 padding: 30px;
-
                 background: #f5f5f5;
-
               }
 
               .box {
-
                 background: white;
-
                 max-width: 500px;
-
                 margin: auto;
-
                 padding: 30px;
-
                 border-radius: 15px;
-
                 box-shadow:
                   0 2px 10px
                   rgba(0,0,0,0.1);
-
               }
 
               img {
-
                 width: 350px;
-
                 max-width: 90%;
-
                 margin: 20px 0;
-
               }
 
               h1 {
-
                 margin-bottom: 10px;
-
               }
 
               p {
-
                 color: #555;
-
               }
 
             </style>
@@ -1806,29 +2233,28 @@ app.get(
           </body>
 
           </html>
-
         `)
-
       }
 
-      // 1 second wait
       await new Promise(
         resolve =>
-          setTimeout(resolve, 1000)
+          setTimeout(
+            resolve,
+            1000
+          )
       )
-
     }
 
-    // QR abhi available nahi hua
     return res.status(202).send(`
-
       <!DOCTYPE html>
 
       <html>
 
       <head>
 
-        <title>N2N WhatsApp</title>
+        <title>
+          N2N WhatsApp
+        </title>
 
         <meta
           name="viewport"
@@ -1856,8 +2282,6 @@ app.get(
       </body>
 
       </html>
-
     `)
-
   }
 )

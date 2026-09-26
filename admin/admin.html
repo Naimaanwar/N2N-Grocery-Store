@@ -1,15 +1,16 @@
-
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
   <meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+
+>
 
   <title>Admin Panel - Grocery Store</title>
 
@@ -184,10 +185,6 @@
       color: #666;
     }
 
-    /* =========================
-       ORDER MODAL
-    ========================= */
-
     #order-modal {
       display: none;
       position: fixed;
@@ -273,10 +270,6 @@
       font-size: 15px;
     }
 
-    /* =========================
-       MOBILE
-    ========================= */
-
     @media (max-width: 700px) {
 
       .stats {
@@ -297,146 +290,487 @@
 
 </head>
 
-
 <body>
+
+  <!-- =========================
+       ADMIN LOGIN PROTECTION
+  ========================== -->
+
+  <script>
+
+    const adminLoggedIn =
+      localStorage.getItem('adminLoggedIn')
+
+    const adminSessionToken =
+      localStorage.getItem('adminSessionToken')
+
+    if (
+      adminLoggedIn !== 'true' ||
+      !adminSessionToken
+    ) {
+
+      localStorage.removeItem(
+        'adminLoggedIn'
+      )
+
+      localStorage.removeItem(
+        'adminSessionToken'
+      )
+
+      window.location.href =
+        '/admin/admin-login.html'
+
+    }
+
+  </script>
 
   <header class="admin-header">
 
-    <h1>🧑‍💼 Grocery Store Admin Panel</h1>
+```
+<h1>🧑‍💼 Grocery Store Admin Panel</h1>
 
-    <p>Manage and view customer orders</p>
+<p>Manage and view customer orders</p>
+
+<button
+  id="admin-logout"
+  style="
+    margin-top: 10px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    background: #dc3545;
+    color: white;
+    cursor: pointer;
+    font-size: 15px;
+  "
+>
+  🚪 Logout
+</button>
+```
 
   </header>
 
-
   <main class="admin-container">
 
-    <!-- =========================
-         STATISTICS
-    ========================= -->
+```
+<!-- =========================
+     ADMIN LICENSE STATUS
+========================== -->
 
-    <div class="stats">
+<div
+  id="license-status"
+  style="
+    background: white;
+    padding: 18px 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-left: 5px solid #198754;
+  "
+>
 
-      <div class="stat-card">
+  <h3 style="margin: 0 0 10px;">
+    🔐 Admin License
+  </h3>
 
-        <h3>
-          Total Orders
-        </h3>
+  <div id="license-info">
+    Checking license...
+  </div>
 
-        <strong id="total-orders">
-          0
-        </strong>
-
-      </div>
-
-
-      <div class="stat-card">
-
-        <h3>
-          Total Sales
-        </h3>
-
-        <strong id="total-sales">
-          Rs. 0
-        </strong>
-
-      </div>
-
-    </div>
+</div>
 
 
-    <!-- =========================
-         REFRESH
-    ========================= -->
+<div class="stats">
 
-    <button
-      id="refresh-orders"
-      class="refresh-button"
-    >
-      🔄 Refresh Orders
-    </button>
+  <div class="stat-card">
 
+    <h3>
+      Total Orders
+    </h3>
 
-    <!-- =========================
-         SEARCH
-    ========================= -->
-
-    <input
-      type="text"
-      id="order-search"
-      class="search-input"
-      placeholder="🔍 Search by order number, name, phone, address or product..."
-    >
-
-
-    <!-- =========================
-         ORDERS
-    ========================= -->
-
-    <section class="orders-box">
-
-      <h2>
-        📦 Customer Orders
-      </h2>
-
-      <div id="orders-container">
-
-        <div class="empty">
-          Loading orders...
-        </div>
-
-      </div>
-
-    </section>
-
-  </main>
-
-
-  <!-- =========================
-       ORDER DETAILS MODAL
-  ========================= -->
-
-  <div
-    id="order-modal"
-  >
-
-    <div class="modal-box">
-
-      <div class="modal-header">
-
-        <h2 id="modal-order-number">
-          Order Details
-        </h2>
-
-        <button
-          id="close-order-modal"
-        >
-          ×
-        </button>
-
-      </div>
-
-      <div id="order-details-content"></div>
-
-    </div>
+    <strong id="total-orders">
+      0
+    </strong>
 
   </div>
 
 
+  <div class="stat-card">
+
+    <h3>
+      Total Sales
+    </h3>
+
+    <strong id="total-sales">
+      Rs. 0
+    </strong>
+
+  </div>
+
+</div>
+
+
+<button
+  id="refresh-orders"
+  class="refresh-button"
+>
+  🔄 Refresh Orders
+</button>
+
+
+<input
+  type="text"
+  id="order-search"
+  class="search-input"
+  placeholder="🔍 Search by order number, name, phone, address or product..."
+>
+
+
+<section class="orders-box">
+
+  <h2>
+    📦 Customer Orders
+  </h2>
+
+  <div id="orders-container">
+
+    <div class="empty">
+      Loading orders...
+    </div>
+
+  </div>
+
+</section>
+```
+
+  </main>
+
+  <div id="order-modal">
+
+```
+<div class="modal-box">
+
+  <div class="modal-header">
+
+    <h2 id="modal-order-number">
+      Order Details
+    </h2>
+
+    <button
+      id="close-order-modal"
+    >
+      ×
+    </button>
+
+  </div>
+
+  <div id="order-details-content"></div>
+
+</div>
+```
+
+  </div>
+
   <script type="module">
 
-    /*
-      Vite API URL
-    */
+    // ==================================================
+    // API URL
+    // ==================================================
 
-    const API_URL = window.location.origin
+    const API_URL =
+      import.meta.env.VITE_API_URL ||
+      (
+        window.location.hostname === 'localhost'
+          ? 'http://localhost:5000'
+          : window.location.origin
+      )
+
+
+    // ==================================================
+    // SECURE ADMIN SESSION
+    // ==================================================
+
+    const sessionToken =
+      localStorage.getItem(
+        'adminSessionToken'
+      )
+
+
+    if (!sessionToken) {
+
+      localStorage.removeItem(
+        'adminLoggedIn'
+      )
+
+      window.location.href =
+        '/admin/admin-login.html'
+
+    }
+
+
+    // ==================================================
+    // SECURE ADMIN FETCH
+    // ==================================================
+
+    async function adminFetch(
+      url,
+      options = {}
+    ) {
+
+      const headers =
+        new Headers(
+          options.headers || {}
+        )
+
+
+      headers.set(
+        'Authorization',
+        `Bearer ${sessionToken}`
+      )
+
+
+      const response =
+        await fetch(
+          url,
+          {
+            ...options,
+            headers
+          }
+        )
+
+
+      // Server ne session reject kiya
+      if (
+        response.status === 401
+      ) {
+
+        localStorage.removeItem(
+          'adminLoggedIn'
+        )
+
+        localStorage.removeItem(
+          'adminSessionToken'
+        )
+
+        window.location.href =
+          '/admin/admin-login.html'
+
+        throw new Error(
+          'Admin session expired.'
+        )
+
+      }
+
+
+      return response
+
+    }
+
+
+    // ==================================================
+    // ADMIN LICENSE STATUS + EXPIRY ENFORCEMENT
+    // ==================================================
+
+    async function loadLicenseStatus() {
+
+      const info =
+        document.getElementById(
+          'license-info'
+        )
+
+      const box =
+        document.getElementById(
+          'license-status'
+        )
+
+
+      try {
+
+        // License status public endpoint hai
+        const response =
+          await fetch(
+            `${API_URL}/api/admin/license-status`
+          )
+
+
+        const data =
+          await response.json()
+
+
+        if (!response.ok) {
+
+          info.innerHTML =
+            `
+            ⚠️ Could not check license status.
+            `
+
+          box.style.borderLeftColor =
+            '#ffc107'
+
+          return
+
+        }
+
+
+        // License expired
+        if (
+          data.expired === true ||
+          data.active === false
+        ) {
+
+          info.innerHTML =
+            `
+            <strong style="color:#dc3545;">
+              ❌ License Expired
+            </strong>
+
+            <br>
+
+            📅 Expiry Date:
+            ${
+              data.expiryDate
+                ? new Date(
+                    data.expiryDate
+                  ).toLocaleDateString()
+                : 'N/A'
+            }
+
+            <br>
+
+            ⏳ Remaining:
+            0 days
+
+            <br><br>
+
+            <strong>
+              Redirecting to Admin Login...
+            </strong>
+            `
+
+          box.style.borderLeftColor =
+            '#dc3545'
+
+
+          localStorage.removeItem(
+            'adminLoggedIn'
+          )
+
+          localStorage.removeItem(
+            'adminSessionToken'
+          )
+
+
+          setTimeout(() => {
+
+            window.location.href =
+              '/admin/admin-login.html'
+
+          }, 1500)
+
+
+          return
+
+        }
+
+
+        // License not activated
+        if (
+          data.success !== true
+        ) {
+
+          info.innerHTML =
+            `
+            <strong style="color:#dc3545;">
+              ❌ License is not activated.
+            </strong>
+
+            <br><br>
+
+            Redirecting to Admin Login...
+            `
+
+          box.style.borderLeftColor =
+            '#dc3545'
+
+
+          localStorage.removeItem(
+            'adminLoggedIn'
+          )
+
+          localStorage.removeItem(
+            'adminSessionToken'
+          )
+
+
+          setTimeout(() => {
+
+            window.location.href =
+              '/admin/admin-login.html'
+
+          }, 1500)
+
+
+          return
+
+        }
+
+
+        // License active
+        const expiry =
+          new Date(
+            data.expiryDate
+          )
+
+
+        info.innerHTML =
+          `
+          <strong style="color:#198754;">
+            ✅ License Active
+          </strong>
+
+          <br>
+
+          📅 Expiry Date:
+          ${expiry.toLocaleDateString()}
+
+          <br>
+
+          ⏳
+          <strong>
+            ${data.remainingDays} days remaining
+          </strong>
+          `
+
+        box.style.borderLeftColor =
+          '#198754'
+
+
+      } catch (error) {
+
+        console.error(
+          'License status error:',
+          error
+        )
+
+        info.innerHTML =
+          `
+          ⚠️ Could not check license status.
+          `
+
+        box.style.borderLeftColor =
+          '#ffc107'
+
+      }
+
+    }
+
+
+    // ==================================================
+    // ORDERS
+    // ==================================================
 
     let allOrders = []
 
-
-    // =========================
-    // LOAD ORDERS
-    // =========================
 
     async function loadOrders() {
 
@@ -448,15 +782,21 @@
 
       try {
 
+        // Protected admin endpoint
         const response =
-          await fetch(
+          await adminFetch(
             `${API_URL}/api/orders`
           )
 
 
         if (!response.ok) {
 
+          const result =
+            await response.json()
+              .catch(() => ({}))
+
           throw new Error(
+            result.message ||
             'Failed to load orders'
           )
 
@@ -467,15 +807,11 @@
           await response.json()
 
 
-        // Total Orders
-
         document.getElementById(
           'total-orders'
         ).textContent =
           allOrders.length
 
-
-        // Total Sales
 
         const totalSales =
           allOrders.reduce(
@@ -515,7 +851,10 @@
 
             <br><br>
 
-            Make sure the backend is running.
+            ${
+              error.message ||
+              'Make sure the backend is running.'
+            }
 
           </div>
 
@@ -526,9 +865,9 @@
     }
 
 
-    // =========================
+    // ==================================================
     // DISPLAY ORDERS
-    // =========================
+    // ==================================================
 
     function displayOrders(
       orders
@@ -567,37 +906,21 @@
 
             <tr>
 
-              <th>
-                Order
-              </th>
+              <th>Order</th>
 
-              <th>
-                Customer
-              </th>
+              <th>Customer</th>
 
-              <th>
-                Contact
-              </th>
+              <th>Contact</th>
 
-              <th>
-                Address
-              </th>
+              <th>Address</th>
 
-              <th>
-                Products
-              </th>
+              <th>Products</th>
 
-              <th>
-                Payment
-              </th>
+              <th>Payment</th>
 
-              <th>
-                Status
-              </th>
+              <th>Status</th>
 
-              <th>
-                Total
-              </th>
+              <th>Total</th>
 
             </tr>
 
@@ -611,35 +934,29 @@
 
               <tr>
 
-                <!-- Order Number -->
-
                 <td>
 
                   <button
                     class="order-details-button"
                     data-order="${order.orderNumber}"
                   >
+
                     #${order.orderNumber}
+
                   </button>
 
                 </td>
 
-
-                <!-- Customer -->
 
                 <td>
                   ${order.name || 'N/A'}
                 </td>
 
 
-                <!-- Phone -->
-
                 <td>
                   ${order.phone || 'N/A'}
                 </td>
 
-
-                <!-- Address -->
 
                 <td>
 
@@ -651,8 +968,6 @@
 
                 </td>
 
-
-                <!-- Products -->
 
                 <td>
 
@@ -678,8 +993,6 @@
                 </td>
 
 
-                <!-- Payment -->
-
                 <td>
 
                   ${order.paymentMethod || 'N/A'}
@@ -687,14 +1000,11 @@
                 </td>
 
 
-                <!-- Status -->
-
                 <td>
 
                   <select
                     class="status-select"
                     data-order="${order.orderNumber}"
-                    onchange="updateStatusColor(this)"
                   >
 
                     <option
@@ -807,15 +1117,15 @@
                 </td>
 
 
-                <!-- Total -->
-
                 <td>
 
                   <strong>
+
                     Rs.
                     ${Number(
                       order.total || 0
                     ).toLocaleString()}
+
                   </strong>
 
                 </td>
@@ -832,8 +1142,6 @@
       `
 
 
-      // Apply status colors
-
       document
         .querySelectorAll(
           '.status-select'
@@ -848,9 +1156,80 @@
     }
 
 
-    // =========================
-    // REFRESH ORDERS
-    // =========================
+    // ==================================================
+    // STATUS COLOR
+    // ==================================================
+
+    function updateStatusColor(
+      select
+    ) {
+
+      if (
+        select.value ===
+        'Pending'
+      ) {
+
+        select.style.background =
+          '#fff3cd'
+
+      }
+
+      else if (
+        select.value ===
+        'Confirmed'
+      ) {
+
+        select.style.background =
+          '#d1ecf1'
+
+      }
+
+      else if (
+        select.value ===
+        'Preparing'
+      ) {
+
+        select.style.background =
+          '#e2d9f3'
+
+      }
+
+      else if (
+        select.value ===
+        'Out for Delivery'
+      ) {
+
+        select.style.background =
+          '#cfe2ff'
+
+      }
+
+      else if (
+        select.value ===
+        'Delivered'
+      ) {
+
+        select.style.background =
+          '#d1e7dd'
+
+      }
+
+      else if (
+        select.value ===
+        'Cancelled'
+      ) {
+
+        select.style.background =
+          '#f8d7da'
+
+      }
+
+    }
+
+
+    // ==================================================
+    // REFRESH
+    // ==================================================
 
     document
       .getElementById(
@@ -862,9 +1241,9 @@
       )
 
 
-    // =========================
-    // SEARCH ORDERS
-    // =========================
+    // ==================================================
+    // SEARCH
+    // ==================================================
 
     const searchInput =
       document.getElementById(
@@ -889,43 +1268,37 @@
               const orderNumber =
                 String(
                   order.orderNumber || ''
-                )
-                  .toLowerCase()
+                ).toLowerCase()
 
 
               const name =
                 String(
                   order.name || ''
-                )
-                  .toLowerCase()
+                ).toLowerCase()
 
 
               const phone =
                 String(
                   order.phone || ''
-                )
-                  .toLowerCase()
+                ).toLowerCase()
 
 
               const address =
                 String(
                   order.address || ''
-                )
-                  .toLowerCase()
+                ).toLowerCase()
 
 
               const city =
                 String(
                   order.city || ''
-                )
-                  .toLowerCase()
+                ).toLowerCase()
 
 
               const payment =
                 String(
                   order.paymentMethod || ''
-                )
-                  .toLowerCase()
+                ).toLowerCase()
 
 
               const products =
@@ -998,9 +1371,9 @@
     )
 
 
-    // =========================
+    // ==================================================
     // STATUS UPDATE
-    // =========================
+    // ==================================================
 
     document.addEventListener(
       'change',
@@ -1032,7 +1405,7 @@
         try {
 
           const response =
-            await fetch(
+            await adminFetch(
               `${API_URL}/api/orders/${orderNumber}`,
               {
 
@@ -1066,12 +1439,6 @@
           }
 
 
-          console.log(
-            'Status updated:',
-            result.order
-          )
-
-
           const index =
             allOrders.findIndex(
               order =>
@@ -1086,6 +1453,11 @@
               status
 
           }
+
+
+          updateStatusColor(
+            target
+          )
 
 
         } catch (error) {
@@ -1110,9 +1482,9 @@
     )
 
 
-    // =========================
+    // ==================================================
     // ORDER DETAILS
-    // =========================
+    // ==================================================
 
     document.addEventListener(
       'click',
@@ -1250,9 +1622,9 @@
     )
 
 
-    // =========================
+    // ==================================================
     // CLOSE MODAL
-    // =========================
+    // ==================================================
 
     document
       .getElementById(
@@ -1270,8 +1642,6 @@
         }
       )
 
-
-    // Close modal when clicking outside
 
     document
       .getElementById(
@@ -1297,80 +1667,9 @@
       )
 
 
-    // =========================
-    // STATUS COLORS
-    // =========================
-
-    function updateStatusColor(
-      select
-    ) {
-
-      if (
-        select.value ===
-        'Pending'
-      ) {
-
-        select.style.background =
-          '#fff3cd'
-
-      }
-
-      else if (
-        select.value ===
-        'Confirmed'
-      ) {
-
-        select.style.background =
-          '#d1ecf1'
-
-      }
-
-      else if (
-        select.value ===
-        'Preparing'
-      ) {
-
-        select.style.background =
-          '#e2d9f3'
-
-      }
-
-      else if (
-        select.value ===
-        'Out for Delivery'
-      ) {
-
-        select.style.background =
-          '#cfe2ff'
-
-      }
-
-      else if (
-        select.value ===
-        'Delivered'
-      ) {
-
-        select.style.background =
-          '#d1e7dd'
-
-      }
-
-      else if (
-        select.value ===
-        'Cancelled'
-      ) {
-
-        select.style.background =
-          '#f8d7da'
-
-      }
-
-    }
-
-
-    // =========================
+    // ==================================================
     // CANCEL ORDER
-    // =========================
+    // ==================================================
 
     document.addEventListener(
       'click',
@@ -1411,7 +1710,7 @@
         try {
 
           const response =
-            await fetch(
+            await adminFetch(
               `${API_URL}/api/orders/${orderNumber}`,
               {
 
@@ -1463,6 +1762,7 @@
 
 
           alert(
+            error.message ||
             'Could not cancel the order.'
           )
 
@@ -1472,9 +1772,9 @@
     )
 
 
-    // =========================
+    // ==================================================
     // REOPEN ORDER
-    // =========================
+    // ==================================================
 
     document.addEventListener(
       'click',
@@ -1502,7 +1802,7 @@
         try {
 
           const response =
-            await fetch(
+            await adminFetch(
               `${API_URL}/api/orders/${orderNumber}`,
               {
 
@@ -1559,6 +1859,7 @@
 
 
           alert(
+            error.message ||
             'Could not reopen the order.'
           )
 
@@ -1568,9 +1869,9 @@
     )
 
 
-    // =========================
+    // ==================================================
     // LOCK ORDER
-    // =========================
+    // ==================================================
 
     document.addEventListener(
       'click',
@@ -1611,7 +1912,7 @@
         try {
 
           const response =
-            await fetch(
+            await adminFetch(
               `${API_URL}/api/orders/${orderNumber}`,
               {
 
@@ -1662,6 +1963,7 @@
 
 
           alert(
+            error.message ||
             'Could not lock the order.'
           )
 
@@ -1671,9 +1973,9 @@
     )
 
 
-    // =========================
+    // ==================================================
     // UNLOCK ORDER
-    // =========================
+    // ==================================================
 
     document.addEventListener(
       'click',
@@ -1714,7 +2016,7 @@
         try {
 
           const response =
-            await fetch(
+            await adminFetch(
               `${API_URL}/api/orders/${orderNumber}`,
               {
 
@@ -1765,6 +2067,7 @@
 
 
           alert(
+            error.message ||
             'Could not unlock the order.'
           )
 
@@ -1774,11 +2077,66 @@
     )
 
 
-    // =========================
-    // START
-    // =========================
+    // ==================================================
+    // LOGOUT
+    // ==================================================
+
+    document
+      .getElementById(
+        'admin-logout'
+      )
+      .addEventListener(
+        'click',
+        async () => {
+
+          try {
+
+            await adminFetch(
+              `${API_URL}/api/admin/logout`,
+              {
+                method: 'POST'
+              }
+            )
+
+          } catch (error) {
+
+            console.log(
+              'Logout session already ended.'
+            )
+
+          }
+
+
+          localStorage.removeItem(
+            'adminLoggedIn'
+          )
+
+          localStorage.removeItem(
+            'adminSessionToken'
+          )
+
+
+          window.location.href =
+            '/admin/admin-login.html'
+
+        }
+      )
+
+
+    // ==================================================
+    // START ADMIN PANEL
+    // ==================================================
+
+    loadLicenseStatus()
 
     loadOrders()
+
+
+    // Check license every hour
+    setInterval(
+      loadLicenseStatus,
+      60 * 60 * 1000
+    )
 
   </script>
 

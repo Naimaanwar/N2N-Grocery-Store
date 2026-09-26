@@ -22,7 +22,12 @@ export default defineConfig({
         'order-tracking': resolve(__dirname, 'order-tracking.html'),
         'thank-you': resolve(__dirname, 'thank-you.html'),
         'admin-orders': resolve(__dirname, 'admin-orders.html'),
-        admin: resolve(__dirname, 'admin/admin.html')
+        admin: resolve(__dirname, 'admin/admin.html'),
+         adminLogin: resolve(__dirname, 'admin/admin-login.html'),
+         adminLicense: resolve(
+  __dirname,
+  'admin/admin-license.html'
+)
       }
     }
   }

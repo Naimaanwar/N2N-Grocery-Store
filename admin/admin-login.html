@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Admin Login - N2N Grocery Store</title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+    }
+
+    .login-box {
+      width: 90%;
+      max-width: 400px;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.12);
+    }
+
+    h1 {
+      text-align: center;
+      margin: 0 0 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 18px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 6px;
+      background: #222;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .license-button {
+      margin-top: 12px;
+      background: #198754;
+    }
+
+    #message {
+      margin-top: 15px;
+      text-align: center;
+      color: #b00020;
+      min-height: 20px;
+    }
+
+    .license-info {
+      margin-top: 18px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="login-box">
+
+    <h1>🧑‍💼 Admin Login</h1>
+
+    <div class="subtitle">
+      N2N Grocery Store
+    </div>
+
+
+    <form id="admin-login-form">
+
+      <label for="username">
+        Username
+      </label>
+
+      <input
+        type="text"
+        id="username"
+        placeholder="Enter username"
+        required
+      >
+
+
+      <label for="password">
+        Password
+      </label>
+
+      <input
+        type="password"
+        id="password"
+        placeholder="Enter password"
+        required
+      >
+
+
+      <button type="submit">
+        🔐 Login
+      </button>
+
+    </form>
+
+
+    <button
+      type="button"
+      id="license-button"
+      class="license-button"
+    >
+      🔑 Activate / Renew 1-Year License
+    </button>
+
+
+    <div class="license-info">
+
+      Admin license is required to access the Admin Panel.
+
+      <div
+        id="license-status"
+        style="
+          margin-top:15px;
+          padding:12px;
+          border-radius:8px;
+          background:#f5f5f5;
+          font-size:14px;
+          text-align:left;
+        "
+      >
+        Checking license status...
+      </div>
+
+    </div>
+
+
+    <div id="message"></div>
+
+  </div>
+
+
+  <script type="module">
+
+    const API_URL =
+      import.meta.env.VITE_API_URL ||
+      (window.location.hostname === 'localhost'
+        ? 'http://localhost:5000'
+        : window.location.origin)
+
+
+    const form =
+      document.getElementById(
+        'admin-login-form'
+      )
+
+
+    const message =
+      document.getElementById(
+        'message'
+      )
+
+
+    const licenseButton =
+      document.getElementById(
+        'license-button'
+      )
+
+
+    // ==================================================
+    // ADMIN LOGIN
+    // ==================================================
+
+    form.addEventListener(
+      'submit',
+      async (event) => {
+
+        event.preventDefault()
+
+        message.textContent = ''
+
+
+        const username =
+          document.getElementById(
+            'username'
+          ).value.trim()
+
+
+        const password =
+          document.getElementById(
+            'password'
+          ).value
+
+
+        try {
+
+          const response =
+            await fetch(
+              `${API_URL}/api/admin/login`,
+              {
+
+                method: 'POST',
+
+                headers: {
+                  'Content-Type':
+                    'application/json'
+                },
+
+                body:
+                  JSON.stringify({
+                    username,
+                    password
+                  })
+
+              }
+            )
+
+
+          const result =
+            await response.json()
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              result.message ||
+              'Login failed'
+            )
+
+          }
+
+
+          // ==================================================
+          // SAVE SECURE SESSION TOKEN
+          // ==================================================
+
+          if (!result.sessionToken) {
+
+            throw new Error(
+              'Secure session could not be created.'
+            )
+
+          }
+
+
+          localStorage.setItem(
+            'adminSessionToken',
+            result.sessionToken
+          )
+
+
+          // Temporary login flag
+          // Admin page will use session token
+          // for secure API access.
+
+          localStorage.setItem(
+            'adminLoggedIn',
+            'true'
+          )
+
+
+          window.location.href =
+            '/admin/admin.html'
+
+
+        } catch (error) {
+
+          console.error(
+            'Admin login failed:',
+            error
+          )
+
+
+          message.style.color =
+            '#b00020'
+
+
+          message.textContent =
+            error.message ||
+            'Login failed'
+
+        }
+
+      }
+    )
+
+
+    // ==================================================
+    // ACTIVATE / RENEW LICENSE
+    // ==================================================
+
+    licenseButton.addEventListener(
+      'click',
+      () => {
+
+        window.location.href =
+          '/admin/admin-license.html'
+
+      }
+    )
+
+
+    // ==================================================
+    // SHOW LICENSE STATUS
+    // ==================================================
+
+    async function showLicenseStatus() {
+
+      const box =
+        document.getElementById(
+          'license-status'
+        )
+
+
+      try {
+
+        const response =
+          await fetch(
+            `${API_URL}/api/admin/license-status`
+          )
+
+
+        const data =
+          await response.json()
+
+
+        if (
+          data.active === true &&
+          data.expired === false
+        ) {
+
+          const expiry =
+            new Date(
+              data.expiryDate
+            )
+
+
+          box.innerHTML =
+            `
+            <strong style="color:#198754;">
+              ✅ License Active
+            </strong>
+
+            <br><br>
+
+            📅 Expiry Date:
+            ${expiry.toLocaleDateString()}
+
+            <br>
+
+            ⏳ ${data.remainingDays} days remaining
+            `
+
+          return
+
+        }
+
+
+        box.innerHTML =
+          `
+          <strong style="color:#dc3545;">
+            ❌ License Expired / Not Activated
+          </strong>
+
+          <br><br>
+
+          Please activate or renew your license.
+          `
+
+      } catch (error) {
+
+        console.error(error)
+
+
+        box.innerHTML =
+          `
+          ⚠️ Could not check license status.
+          `
+
+      }
+
+    }
+
+
+    showLicenseStatus()
+
+  </script>
+
+</body>
+
+</html>
