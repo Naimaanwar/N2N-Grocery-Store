@@ -1,3 +1,4 @@
+
 import * as XLSX from 'xlsx'
 
 import appleImg from './assets/apple.png'
@@ -36,8 +37,7 @@ if (
 ) {
   localStorage.setItem(
     'loginReturnUrl',
-    window.location.pathname +
-      window.location.search
+    window.location.pathname + window.location.search
   )
 
   window.location.href =
@@ -58,9 +58,7 @@ async function adminFetch(
 ): Promise<Response> {
 
   const token =
-    localStorage.getItem(
-      'adminSessionToken'
-    )
+    localStorage.getItem('adminSessionToken')
 
   if (!token) {
 
@@ -128,19 +126,12 @@ async function adminFetch(
 // =========================
 
 const imageMap: Record<string, string> = {
-
   'apple.png': appleImg,
-
   'banana.png': bananaImg,
-
   'mango.png': mangoImg,
-
   'guava.png': guavaImg,
-
   'strawberry.png': strawberryImg,
-
   'milk.png': milkImg,
-
   'bread.png': breadImg
 }
 
@@ -237,8 +228,7 @@ const saveEditProductButton =
     '#save-edit-product-button'
   ) as HTMLButtonElement
 
-let editingProductId:
-  number | null = null
+let editingProductId: number | null = null
 
 // =========================
 // READ IMAGE FILE
@@ -355,51 +345,11 @@ function getProductImage(
   image: string
 ): string {
 
-  if (!image) {
-    return ''
-  }
-
-  const normalized =
-    String(image)
-      .split('\\')
-      .pop()
-      ?.split('/')
-      .pop()
-      ?.toLowerCase() || ''
-
   return (
-    imageMap[normalized] ||
+    imageMap[image] ||
     image ||
     ''
   )
-}
-
-// =========================
-// NORMALIZE EXCEL VALUE
-// =========================
-
-function getExcelValue(
-  row: Record<string, any>,
-  field: string
-): any {
-
-  const keys =
-    Object.keys(row)
-
-  const foundKey =
-    keys.find(
-      key =>
-        key
-          .trim()
-          .toLowerCase() ===
-        field.toLowerCase()
-    )
-
-  if (!foundKey) {
-    return ''
-  }
-
-  return row[foundKey]
 }
 
 // =========================
@@ -494,17 +444,6 @@ function createExcelImportUI() {
       </strong>
     </p>
 
-    <p
-      style="
-        margin:6px 0 0 0;
-        font-size:13px;
-        color:#555;
-      "
-    >
-      Same product name = Update existing product.
-      New product name = Add new product.
-    </p>
-
   `
 
   if (productsList) {
@@ -549,11 +488,10 @@ function createExcelImportUI() {
         return
       }
 
-      await importExcelFile(
-        file
-      )
+      await importExcelFile(file)
 
-      excelFileInput.value = ''
+      excelFileInput.value =
+        ''
     }
   )
 
@@ -664,9 +602,6 @@ async function importExcelFile(
   file: File
 ) {
 
-  let loadingMessage:
-    HTMLDivElement | null = null
-
   try {
 
     const extension =
@@ -687,11 +622,7 @@ async function importExcelFile(
       return
     }
 
-    // =========================
-    // LOADING
-    // =========================
-
-    loadingMessage =
+    const loadingMessage =
       document.createElement('div')
 
     loadingMessage.id =
@@ -716,10 +647,6 @@ async function importExcelFile(
     document.body.appendChild(
       loadingMessage
     )
-
-    // =========================
-    // READ EXCEL
-    // =========================
 
     const arrayBuffer =
       await file.arrayBuffer()
@@ -764,10 +691,7 @@ async function importExcelFile(
       )
     }
 
-    // =========================
-    // LOAD EXISTING PRODUCTS
-    // =========================
-
+    // Existing products
     const productsResponse =
       await adminFetch(
         `${API_URL}/api/products`
@@ -783,21 +707,13 @@ async function importExcelFile(
     const existingProducts =
       await productsResponse.json()
 
-    // =========================
-    // COUNTERS
-    // =========================
+    let addedCount =
+      0
 
-    let addedCount = 0
-
-    let updatedCount = 0
-
-    let skippedCount = 0
+    let skippedCount =
+      0
 
     const errors: string[] = []
-
-    // =========================
-    // PROCESS ROWS
-    // =========================
 
     for (
       let index = 0;
@@ -811,61 +727,51 @@ async function importExcelFile(
       const excelRowNumber =
         index + 2
 
-      // =========================
-      // GET VALUES
-      // =========================
-
       const name =
         String(
-          getExcelValue(
-            row,
-            'Name'
-          ) ?? ''
+          row.Name ??
+          row.name ??
+          ''
         ).trim()
 
       const price =
         Number(
-          getExcelValue(
-            row,
-            'Price'
-          )
+          row.Price ??
+          row.price ??
+          0
         )
 
       const category =
         String(
-          getExcelValue(
-            row,
-            'Category'
-          ) ?? ''
+          row.Category ??
+          row.category ??
+          ''
         ).trim()
 
       const unit =
         String(
-          getExcelValue(
-            row,
-            'Unit'
-          ) ?? ''
+          row.Unit ??
+          row.unit ??
+          ''
         ).trim()
 
       const stock =
         Number(
-          getExcelValue(
-            row,
-            'Stock'
-          )
+          row.Stock ??
+          row.stock ??
+          0
         )
 
       const imageName =
         String(
-          getExcelValue(
-            row,
-            'Image'
-          ) ?? ''
+          row.Image ??
+          row.image ??
+          ''
         ).trim()
 
-      // =========================
+      // -------------------------
       // VALIDATION
-      // =========================
+      // -------------------------
 
       if (!name) {
 
@@ -885,6 +791,20 @@ async function importExcelFile(
 
         errors.push(
           `Row ${excelRowNumber}: Invalid price`
+        )
+
+        skippedCount++
+
+        continue
+      }
+
+      if (
+        Number.isNaN(stock) ||
+        stock < 0
+      ) {
+
+        errors.push(
+          `Row ${excelRowNumber}: Invalid stock`
         )
 
         skippedCount++
@@ -914,56 +834,21 @@ async function importExcelFile(
         continue
       }
 
-      if (
-        Number.isNaN(stock) ||
-        stock < 0
-      ) {
-
-        errors.push(
-          `Row ${excelRowNumber}: Invalid stock`
-        )
-
-        skippedCount++
-
-        continue
-      }
-
-      // =========================
+      // -------------------------
       // PRODUCT CODE
-      // =========================
+      // -------------------------
 
       const productCode =
         createProductCode(
           name
         )
 
-      if (!productCode) {
+      // -------------------------
+      // DUPLICATE CHECK
+      // -------------------------
 
-        errors.push(
-          `Row ${excelRowNumber}: Product name se valid product code nahi ban saka`
-        )
-
-        skippedCount++
-
-        continue
-      }
-
-      // =========================
-      // FIND EXISTING PRODUCT
-      // =========================
-
-      const normalizedName =
-        name
-          .trim()
-          .toLowerCase()
-
-      const normalizedCode =
-        productCode
-          .trim()
-          .toLowerCase()
-
-      const existingProduct =
-        existingProducts.find(
+      const duplicate =
+        existingProducts.some(
           (product: any) => {
 
             const existingName =
@@ -975,30 +860,39 @@ async function importExcelFile(
 
             const existingCode =
               String(
-                product.product_code || ''
+                product.product_code ||
+                ''
               )
                 .trim()
                 .toLowerCase()
 
             return (
               existingName ===
-                normalizedName ||
+              name.toLowerCase() ||
               existingCode ===
-                normalizedCode
+              productCode.toLowerCase()
             )
           }
         )
 
-      // =========================
-      // IMAGE FOR NEW PRODUCT
-      // =========================
+      if (duplicate) {
+
+        skippedCount++
+
+        errors.push(
+          `Row ${excelRowNumber}: ${name} already exists`
+        )
+
+        continue
+      }
+
+      // -------------------------
+      // IMAGE
+      // -------------------------
 
       let image = ''
 
-      if (
-        imageName &&
-        !existingProduct
-      ) {
+      if (imageName) {
 
         const normalizedImage =
           imageName
@@ -1035,113 +929,16 @@ async function importExcelFile(
         } else {
 
           errors.push(
-            `Row ${excelRowNumber}: Image "${imageName}" not found. Product image will be empty.`
+            `Row ${excelRowNumber}: Image "${imageName}" not found in existing product images`
           )
         }
       }
 
-      // =========================
-      // UPDATE EXISTING PRODUCT
-      // =========================
-
-      if (existingProduct) {
-
-        try {
-
-          if (loadingMessage) {
-
-            loadingMessage.textContent =
-              `🔄 Updating ${name}... ${index + 1}/${rows.length}`
-          }
-
-          const response =
-            await adminFetch(
-              `${API_URL}/api/products/${existingProduct.id}`,
-              {
-                method: 'PUT',
-
-                headers: {
-                  'Content-Type':
-                    'application/json'
-                },
-
-                body:
-                  JSON.stringify({
-
-                    name,
-
-                    price,
-
-                    category,
-
-                    unit,
-
-                    stock
-
-                  })
-              }
-            )
-
-          if (!response.ok) {
-
-            const errorData =
-              await response
-                .json()
-                .catch(
-                  () => null
-                )
-
-            throw new Error(
-              errorData?.message ||
-              'Product update failed'
-            )
-          }
-
-          updatedCount++
-
-          // Update local copy
-          existingProduct.name =
-            name
-
-          existingProduct.price =
-            price
-
-          existingProduct.category =
-            category
-
-          existingProduct.unit =
-            unit
-
-          existingProduct.stock =
-            stock
-
-        } catch (error) {
-
-          console.error(
-            error
-          )
-
-          skippedCount++
-
-          errors.push(
-            `Row ${excelRowNumber}: ${name} update nahi ho saka`
-          )
-        }
-
-        continue
-      }
-
-      // =========================
-      // ADD NEW PRODUCT
-      // =========================
+      // -------------------------
+      // ADD PRODUCT
+      // -------------------------
 
       try {
-
-        if (loadingMessage) {
-
-          loadingMessage.textContent =
-            `➕ Adding ${name}... ${index + 1}/${rows.length}`
-        }
 
         const response =
           await adminFetch(
@@ -1193,42 +990,14 @@ async function importExcelFile(
           )
         }
 
-        const result =
-          await response
-            .json()
-            .catch(
-              () => null
-            )
-
         addedCount++
 
-        // Add to local list
-        // so duplicate rows in same Excel
-        // are detected as existing
+        // Add imported product locally
+        // so duplicate Excel rows are also skipped
         existingProducts.push({
-
-          id:
-            result?.product?.id ||
-            result?.id ||
-            `excel-${index}`,
-
           name,
-
-          price,
-
-          category,
-
-          unit,
-
-          stock,
-
           product_code:
-            productCode,
-
-          image:
-            result?.product?.image ||
-            ''
-
+            productCode
         })
 
       } catch (error) {
@@ -1243,31 +1012,18 @@ async function importExcelFile(
           `Row ${excelRowNumber}: ${name} add nahi ho saka`
         )
       }
+
+      loadingMessage.textContent =
+        `📥 Importing... ${index + 1}/${rows.length}`
     }
 
-    // =========================
-    // REMOVE LOADING
-    // =========================
-
-    if (loadingMessage) {
-      loadingMessage.remove()
-      loadingMessage = null
-    }
-
-    // =========================
-    // REFRESH PRODUCTS
-    // =========================
+    loadingMessage.remove()
 
     await loadProducts()
-
-    // =========================
-    // RESULT
-    // =========================
 
     let message =
       `Excel import complete! ✅\n\n` +
       `Added: ${addedCount}\n` +
-      `Updated: ${updatedCount}\n` +
       `Skipped: ${skippedCount}`
 
     if (
@@ -1302,9 +1058,12 @@ async function importExcelFile(
       error
     )
 
-    if (loadingMessage) {
-      loadingMessage.remove()
-    }
+    const loading =
+      document.querySelector(
+        '#excel-import-loading'
+      )
+
+    loading?.remove()
 
     alert(
       error instanceof Error
@@ -1416,33 +1175,31 @@ function renderProducts(
                   margin:0 auto 12px auto !important;
                 "
               >
-
               <input
-                type="file"
-                accept="image/*"
-                class="product-image-file-input"
-                data-id="${product.id}"
-                id="product-image-file-${product.id}"
-                style="display:none;"
-              >
+  type="file"
+  accept="image/*"
+  class="product-image-file-input"
+  data-id="${product.id}"
+  id="product-image-file-${product.id}"
+  style="display:none;"
+>
 
-              <button
-                type="button"
-                class="choose-product-image-button"
-                data-id="${product.id}"
-                style="
-                  display:block;
-                  margin:0 auto 12px auto;
-                  padding:7px 12px;
-                  border:none;
-                  border-radius:6px;
-                  cursor:pointer;
-                  font-size:13px;
-                "
-              >
-                📷 Choose Image
-              </button>
-
+<button
+  type="button"
+  class="choose-product-image-button"
+  data-id="${product.id}"
+  style="
+    display:block;
+    margin:0 auto 12px auto;
+    padding:7px 12px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:13px;
+  "
+>
+  📷 Choose Image
+</button>
               <h3>
                 ${product.name}
               </h3>
@@ -1451,8 +1208,7 @@ function renderProducts(
 
                 <p>
                   <strong>Price:</strong>
-                  Rs.
-                  ${
+                  Rs. ${
                     Number(
                       product.price
                     ).toFixed(2)
@@ -1510,7 +1266,7 @@ function renderProducts(
         }
       )
       .join('')
-
+ 
   // =========================
   // EDIT BUTTONS
   // =========================
@@ -1551,7 +1307,7 @@ function renderProducts(
         )
       }
     )
-
+  
   // =========================
   // DELETE BUTTONS
   // =========================
@@ -1581,85 +1337,75 @@ function renderProducts(
         )
       }
     )
-
-  // =========================
-  // CHOOSE IMAGE BUTTONS
-  // =========================
-
-  document
-    .querySelectorAll(
-      '.choose-product-image-button'
-    )
-    .forEach(
-      button => {
-
-        button.addEventListener(
-          'click',
-          () => {
-
-            const id =
-              (
-                button as HTMLButtonElement
-              ).dataset.id
-
-            if (!id) {
-              return
-            }
-
-            const input =
-              document.querySelector(
-                `#product-image-file-${id}`
-              ) as HTMLInputElement
-
-            input?.click()
-          }
-        )
-      }
-    )
-
-  // =========================
-  // IMAGE FILE INPUTS
-  // =========================
-
-  document
-    .querySelectorAll(
-      '.product-image-file-input'
-    )
-    .forEach(
-      input => {
-
-        input.addEventListener(
-          'change',
-          async () => {
-
-            const fileInput =
-              input as HTMLInputElement
-
-            const file =
-              fileInput.files?.[0]
-
-            if (!file) {
-              return
-            }
-
-            const id =
-              Number(
-                fileInput.dataset.id
-              )
-
-            await uploadProductImage(
-              id,
-              file
-            )
-
-            fileInput.value =
-              ''
-          }
-        )
-      }
-    )
 }
+// =========================
+// CHOOSE PRODUCT IMAGE
+// =========================
 
+document
+  .querySelectorAll(
+    '.choose-product-image-button'
+  )
+  .forEach(button => {
+
+    button.addEventListener(
+      'click',
+      () => {
+
+        const id =
+          (
+            button as HTMLButtonElement
+          ).dataset.id
+
+        if (!id) {
+          return
+        }
+
+        const input =
+          document.querySelector(
+            `#product-image-file-${id}`
+          ) as HTMLInputElement
+
+        input?.click()
+      }
+    )
+  })
+
+document
+  .querySelectorAll(
+    '.product-image-file-input'
+  )
+  .forEach(input => {
+
+    input.addEventListener(
+      'change',
+      async () => {
+
+        const fileInput =
+          input as HTMLInputElement
+
+        const file =
+          fileInput.files?.[0]
+
+        if (!file) {
+          return
+        }
+
+        const id =
+          Number(
+            fileInput.dataset.id
+          )
+
+        await uploadProductImage(
+          id,
+          file
+        )
+
+        fileInput.value =
+          ''
+      }
+    )
+  })
 // =========================
 // OPEN EDIT MODAL
 // =========================
@@ -1782,9 +1528,7 @@ saveEditProductButton.addEventListener(
 
     if (
       !name ||
-      Number.isNaN(price) ||
       price < 0 ||
-      Number.isNaN(stock) ||
       stock < 0
     ) {
 
@@ -1820,33 +1564,6 @@ saveEditProductButton.addEventListener(
           )
       }
 
-      const body: any = {
-
-        name,
-
-        price,
-
-        category,
-
-        stock,
-
-        unit
-
-      }
-
-      // Only send image if
-      // user selected a new image.
-      // Otherwise backend preserves old image.
-
-      if (selectedFile) {
-
-        body.image =
-          image
-
-        body.imageName =
-          selectedFile.name
-      }
-
       const response =
         await adminFetch(
           `${API_URL}/api/products/${editingProductId}`,
@@ -1859,9 +1576,26 @@ saveEditProductButton.addEventListener(
             },
 
             body:
-              JSON.stringify(
-                body
-              )
+              JSON.stringify({
+
+                name,
+
+                price,
+
+                category,
+
+                stock,
+
+                unit,
+
+                image,
+
+                imageName:
+                  selectedFile
+                    ? selectedFile.name
+                    : ''
+
+              })
           }
         )
 
@@ -1902,9 +1636,7 @@ saveEditProductButton.addEventListener(
       )
 
       alert(
-        error instanceof Error
-          ? error.message
-          : 'Product update nahi ho saka.'
+        'Product update nahi ho saka.'
       )
     }
   }
@@ -1942,9 +1674,7 @@ addProductButton.addEventListener(
 
     if (
       !name ||
-      Number.isNaN(price) ||
       price < 0 ||
-      Number.isNaN(stock) ||
       stock < 0
     ) {
 
@@ -1981,15 +1711,6 @@ addProductButton.addEventListener(
       createProductCode(
         name
       )
-
-    if (!productCode) {
-
-      alert(
-        'Product name valid nahi hai.'
-      )
-
-      return
-    }
 
     try {
 
@@ -2074,14 +1795,11 @@ addProductButton.addEventListener(
       )
 
       alert(
-        error instanceof Error
-          ? error.message
-          : 'Product add nahi ho saka.'
+        'Product add nahi ho saka.'
       )
     }
   }
 )
-
 // =========================
 // UPLOAD PRODUCT IMAGE
 // =========================
@@ -2092,9 +1810,7 @@ async function uploadProductImage(
 ) {
 
   if (
-    !file.type.startsWith(
-      'image/'
-    )
+    !file.type.startsWith('image/')
   ) {
 
     alert(
@@ -2163,13 +1879,10 @@ async function uploadProductImage(
     )
 
     alert(
-      error instanceof Error
-        ? error.message
-        : 'Product image update nahi ho saki.'
+      'Product image update nahi ho saki.'
     )
   }
 }
-
 // =========================
 // DELETE PRODUCT
 // =========================
@@ -2184,6 +1897,7 @@ async function deleteProduct(
     )
 
   if (!confirmed) {
+
     return
   }
 
@@ -2225,9 +1939,7 @@ async function deleteProduct(
     )
 
     alert(
-      error instanceof Error
-        ? error.message
-        : 'Product delete nahi ho saka.'
+      'Product delete nahi ho saka.'
     )
   }
 }

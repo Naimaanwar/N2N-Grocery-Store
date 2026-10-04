@@ -18,6 +18,10 @@ body {
   border-radius: 15px;
   text-align: center;
   margin-bottom: 30px;
+
+  position: relative !important;
+  min-height: 150px;
+  box-sizing: border-box;
 }
 
 .header h1 {
@@ -2076,4 +2080,164 @@ width: 100%;
   #admin-products-list {
     grid-template-columns: 1fr !important;
   }
+}
+/* =========================================
+   N2N - CART BUTTON
+   ========================================= */
+
+.cart-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  padding: 11px 18px;
+
+  background: #198754;
+  color: white;
+
+  border: none;
+  border-radius: 8px;
+
+  text-decoration: none;
+
+  font-size: 15px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  box-sizing: border-box;
+}
+
+.cart-button:hover {
+  background: #146c43;
+}
+
+@media (max-width: 600px) {
+  .cart-button {
+    top: 12px;
+    right: 12px;
+    padding: 9px 14px;
+    font-size: 14px;
+  }
+}
+/* =========================
+   CUSTOMER HEADER CART BUTTON
+========================= */
+
+.header {
+  position: relative;
+}
+
+#cart-button.cart {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+
+  background: white;
+  color: #198754;
+
+  border: none;
+  border-radius: 10px;
+
+  padding: 10px 18px;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+
+  z-index: 10;
+}
+
+#cart-button.cart:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.20);
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+
+  #cart-button.cart {
+    top: 15px;
+    right: 15px;
+
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+}
+/* =========================
+   FINAL TOP-RIGHT CART
+========================= */
+
+.header #cart-button {
+  position: absolute !important;
+
+  top: 20px !important;
+  right: 20px !important;
+
+  left: unset !important;
+  bottom: unset !important;
+
+  width: 130px !important;
+  min-width: 130px !important;
+  max-width: 130px !important;
+
+  height: 45px !important;
+
+  margin: 0 !important;
+  padding: 10px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  background: #ffffff !important;
+  color: #198754 !important;
+
+  border: none !important;
+  border-radius: 10px !important;
+
+  font-size: 16px !important;
+  font-weight: 700 !important;
+
+  z-index: 999999 !important;
+
+  transform: none !important;
+}
+
+/* Keep account information separate */
+.header #account-area {
+  display: block;
+  width: 100%;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+
+  .header {
+    padding-top: 80px !important;
+  }
+
+  .header #cart-button {
+    top: 15px !important;
+    right: 15px !important;
+
+    width: 115px !important;
+    min-width: 115px !important;
+    max-width: 115px !important;
+
+    height: 40px !important;
+
+    font-size: 14px !important;
+  }
+
 }

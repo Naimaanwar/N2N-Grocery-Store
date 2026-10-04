@@ -1,3 +1,4 @@
+
 import './style.css'
 
 import appleImg from './assets/apple.png'
@@ -45,6 +46,7 @@ const cart: Record<string, number> =
     ? JSON.parse(savedCart)
     : {}
 
+
 /* =========================
    LOAD PRODUCTS FROM MYSQL
 ========================= */
@@ -53,15 +55,16 @@ async function loadProducts() {
 
   try {
 
-   const API_URL =
-  import.meta.env.VITE_API_URL ||
-  (window.location.hostname === 'localhost'
-    ? 'http://localhost:5000'
-    : window.location.origin)
-const response =
-  await fetch(
-    `${API_URL}/api/products`
-  )
+    const API_URL =
+      import.meta.env.VITE_API_URL ||
+      (window.location.hostname === 'localhost'
+        ? 'http://localhost:5000'
+        : window.location.origin)
+
+    const response =
+      await fetch(
+        `${API_URL}/api/products`
+      )
 
     if (!response.ok) {
       throw new Error(
@@ -121,6 +124,7 @@ const response =
 
 }
 
+
 /* =========================
    PAGE HTML
 ========================= */
@@ -128,11 +132,23 @@ const response =
 document.querySelector<HTMLDivElement>(
   '#app'
 )!.innerHTML = `
+
   <div class="app">
 
-    <header class="header">
+    <!-- =====================
+         HEADER
+    ====================== -->
 
-      <h1>🛒 Grocery Store</h1>
+    <header
+      class="header"
+      style="
+        position: relative !important;
+      "
+    >
+
+      <h1>
+        🛒 Grocery Store
+      </h1>
 
       <p>
         Fresh groceries delivered to your door
@@ -140,38 +156,119 @@ document.querySelector<HTMLDivElement>(
 
       <div id="account-area"></div>
 
-      <button
-        id="cart-button"
-        class="cart"
-      >
-        🛍️ Cart:
-        <span id="cart-count">0</span>
-      </button>
-      <div id="floating-cart" class="floating-cart">
-
-  <div class="floating-cart-info">
-    <span class="floating-cart-icon">🛒</span>
-
-    <div>
-      <strong>
-        <span id="floating-cart-count">0</span> Items
-      </strong>
-
-      <small>
-        Added to cart
-      </small>
-    </div>
-  </div>
-
-  <button
-    id="floating-cart-button"
-    class="floating-cart-button"
-  >
-    View Cart →
-  </button>
-
-</div>
     </header>
+
+
+    <!-- =====================
+         TOP RIGHT CART
+    ====================== -->
+
+    <button
+      id="cart-button"
+      type="button"
+      style="
+        position: fixed !important;
+
+        top: 20px !important;
+        right: 20px !important;
+
+        left: auto !important;
+        bottom: auto !important;
+
+        width: 130px !important;
+        min-width: 130px !important;
+        max-width: 130px !important;
+
+        height: 45px !important;
+        min-height: 45px !important;
+        max-height: 45px !important;
+
+        margin: 0 !important;
+        padding: 8px 12px !important;
+
+        display: flex !important;
+
+        align-items: center !important;
+        justify-content: center !important;
+
+        visibility: visible !important;
+        opacity: 1 !important;
+
+        background: white !important;
+        color: #198754 !important;
+
+        border: 2px solid #198754 !important;
+        border-radius: 10px !important;
+
+        font-size: 16px !important;
+        font-weight: 700 !important;
+
+        line-height: 1 !important;
+
+        cursor: pointer !important;
+
+        box-sizing: border-box !important;
+
+        z-index: 2147483647 !important;
+      "
+    >
+      🛍️ Cart:
+      <span
+        id="cart-count"
+        style="
+          margin-left: 5px;
+        "
+      >
+        0
+      </span>
+    </button>
+
+
+    <!-- =====================
+         FLOATING CART
+    ====================== -->
+
+    <div
+      id="floating-cart"
+      class="floating-cart"
+    >
+
+      <div class="floating-cart-info">
+
+        <span class="floating-cart-icon">
+          🛒
+        </span>
+
+        <div>
+
+          <strong>
+            <span id="floating-cart-count">
+              0
+            </span>
+            Items
+          </strong>
+
+          <small>
+            Added to cart
+          </small>
+
+        </div>
+
+      </div>
+
+      <button
+        id="floating-cart-button"
+        class="floating-cart-button"
+      >
+        View Cart →
+      </button>
+
+    </div>
+
+
+    <!-- =====================
+         SHOP CONTROLS
+    ====================== -->
 
     <div class="shop-controls">
 
@@ -222,18 +319,28 @@ document.querySelector<HTMLDivElement>(
 
     </div>
 
+
+    <!-- =====================
+         PRODUCTS
+    ====================== -->
+
     <main class="products">
-      <p style="
-        width: 100%;
-        text-align: center;
-        padding: 30px;
-      ">
+
+      <p
+        style="
+          width: 100%;
+          text-align: center;
+          padding: 30px;
+        "
+      >
         Loading products...
       </p>
+
     </main>
 
   </div>
 `
+
 
 /* =========================
    RENDER PRODUCTS
@@ -324,9 +431,10 @@ function renderProducts() {
 
           if (!product) return
 
-          // =========================
-          // CHECK STOCK
-          // =========================
+
+          /* =====================
+             CHECK STOCK
+          ====================== */
 
           const currentQuantity =
             cart[id] || 0
@@ -344,9 +452,9 @@ function renderProducts() {
           }
 
 
-          // =========================
-          // ADD TO CART
-          // =========================
+          /* =====================
+             ADD TO CART
+          ====================== */
 
           cart[id] =
             currentQuantity + 1
@@ -359,6 +467,8 @@ function renderProducts() {
     })
 
 }
+
+
 /* =========================
    ACCOUNT LOGIN / LOGOUT
 ========================= */
@@ -424,6 +534,7 @@ if (
 
 }
 
+
 /* =========================
    CART
 ========================= */
@@ -432,6 +543,7 @@ const cartCount =
   document.querySelector<HTMLSpanElement>(
     '#cart-count'
   )!
+
 const floatingCart =
   document.querySelector<HTMLDivElement>(
     '#floating-cart'
@@ -446,6 +558,8 @@ const floatingCartButton =
   document.querySelector<HTMLButtonElement>(
     '#floating-cart-button'
   )!
+
+
 function updateCartCount() {
 
   let totalItems = 0
@@ -464,6 +578,7 @@ function updateCartCount() {
   floatingCartCount.textContent =
     totalItems.toString()
 
+
   if (totalItems > 0) {
 
     floatingCart.classList.add(
@@ -478,25 +593,39 @@ function updateCartCount() {
 
   }
 
+
   localStorage.setItem(
     'grocery-cart',
     JSON.stringify(cart)
   )
+
 }
 
-document
-  .querySelector<HTMLButtonElement>(
+
+/* =========================
+   CART BUTTON
+========================= */
+
+const cartButton =
+  document.querySelector<HTMLButtonElement>(
     '#cart-button'
   )!
-  .addEventListener(
-    'click',
-    () => {
 
-      window.location.href =
-        '/cart.html'
+cartButton.addEventListener(
+  'click',
+  () => {
 
-    }
-  )
+    window.location.href =
+      '/cart.html'
+
+  }
+)
+
+
+/* =========================
+   FLOATING CART BUTTON
+========================= */
+
 floatingCartButton.addEventListener(
   'click',
   () => {
@@ -506,6 +635,8 @@ floatingCartButton.addEventListener(
 
   }
 )
+
+
 /* =========================
    SEARCH
 ========================= */
@@ -519,6 +650,7 @@ const categoryButtons =
   document.querySelectorAll<HTMLButtonElement>(
     '.category'
   )
+
 
 function filterProducts() {
 
@@ -540,6 +672,7 @@ function filterProducts() {
     document.querySelectorAll<HTMLDivElement>(
       '.product'
     )
+
 
   productCards.forEach(
     product => {
@@ -569,12 +702,15 @@ function filterProducts() {
 
     }
   )
+
 }
+
 
 searchInput.addEventListener(
   'input',
   filterProducts
 )
+
 
 categoryButtons.forEach(
   button => {
@@ -585,9 +721,11 @@ categoryButtons.forEach(
 
         categoryButtons.forEach(
           btn => {
+
             btn.classList.remove(
               'active'
             )
+
           }
         )
 
@@ -602,6 +740,7 @@ categoryButtons.forEach(
 
   }
 )
+
 
 /* =========================
    START
