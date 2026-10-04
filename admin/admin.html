@@ -1,16 +1,14 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
 
   <meta charset="UTF-8">
 
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0"
-
->
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>Admin Panel - Grocery Store</title>
 
@@ -95,13 +93,163 @@ content="width=device-width, initial-scale=1.0"
       border-color: #555;
     }
 
-    .orders-box {
+    .orders-box,
+    .products-box {
       background: white;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 25px;
       overflow-x: auto;
     }
+
+    .section-title {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+
+    /* =========================================
+       PRODUCT FORM
+    ========================================= */
+
+    .product-form {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+      background: white;
+    }
+
+    .form-group input[type="file"] {
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .add-product-button,
+    #add-product-button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      background: #198754;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .add-product-button:hover,
+    #add-product-button:hover {
+      opacity: 0.9;
+    }
+
+    /* =========================================
+       EXISTING PRODUCTS
+       5 PRODUCTS PER ROW
+    ========================================= */
+
+    #admin-products-list {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .product-list-item {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: stretch;
+      gap: 8px;
+      padding: 10px;
+      margin-bottom: 0;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      background: #f9fafb;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .product-list-item img {
+      width: 100%;
+      height: 100px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 6px;
+      background: white;
+    }
+
+    .product-info {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .product-info h3 {
+      margin: 0 0 5px;
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .product-info p {
+      margin: 4px 0;
+      color: #555;
+      font-size: 13px;
+    }
+
+    .product-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;
+      width: 100%;
+    }
+
+    .product-actions button {
+      border: none;
+      padding: 7px 5px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      flex: 1;
+    }
+
+    .edit-product-button {
+      background: #cfe2ff;
+      color: #084298;
+    }
+
+    .delete-product-button {
+      background: #f8d7da;
+      color: #842029;
+    }
+
+    /* =========================================
+       ORDERS TABLE
+    ========================================= */
 
     table {
       width: 100%;
@@ -185,7 +333,12 @@ content="width=device-width, initial-scale=1.0"
       color: #666;
     }
 
-    #order-modal {
+    /* =========================================
+       MODALS
+    ========================================= */
+
+    #order-modal,
+    #edit-product-modal {
       display: none;
       position: fixed;
       top: 0;
@@ -221,7 +374,8 @@ content="width=device-width, initial-scale=1.0"
       margin: 0;
     }
 
-    #close-order-modal {
+    #close-order-modal,
+    #close-edit-product-modal {
       border: none;
       background: #eee;
       width: 35px;
@@ -231,7 +385,8 @@ content="width=device-width, initial-scale=1.0"
       font-size: 20px;
     }
 
-    #close-order-modal:hover {
+    #close-order-modal:hover,
+    #close-edit-product-modal:hover {
       background: #ddd;
     }
 
@@ -270,6 +425,68 @@ content="width=device-width, initial-scale=1.0"
       font-size: 15px;
     }
 
+    .edit-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .edit-form label {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .edit-form input,
+    .edit-form select {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+      margin-top: 5px;
+      background: white;
+    }
+
+    .edit-form input[type="file"] {
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    #save-edit-product-button {
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      background: #0d6efd;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    #save-edit-product-button:hover {
+      opacity: 0.9;
+    }
+
+    /* =========================================
+       RESPONSIVE
+    ========================================= */
+
+    @media (max-width: 1100px) {
+
+      #admin-products-list {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+    }
+
+    @media (max-width: 850px) {
+
+      #admin-products-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+    }
+
     @media (max-width: 700px) {
 
       .stats {
@@ -280,8 +497,34 @@ content="width=device-width, initial-scale=1.0"
         padding: 0 10px;
       }
 
-      .orders-box {
+      .orders-box,
+      .products-box {
         padding: 10px;
+      }
+
+      .product-form {
+        grid-template-columns: 1fr;
+      }
+
+      .full-width {
+        grid-column: auto;
+      }
+
+    }
+
+    @media (max-width: 600px) {
+
+      #admin-products-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .product-list-item img {
+        height: 85px;
+      }
+
+      .product-actions button {
+        font-size: 11px;
+        padding: 6px 3px;
       }
 
     }
@@ -290,7 +533,9 @@ content="width=device-width, initial-scale=1.0"
 
 </head>
 
+
 <body>
+
 
   <!-- =========================
        ADMIN LOGIN PROTECTION
@@ -309,13 +554,8 @@ content="width=device-width, initial-scale=1.0"
       !adminSessionToken
     ) {
 
-      localStorage.removeItem(
-        'adminLoggedIn'
-      )
-
-      localStorage.removeItem(
-        'adminSessionToken'
-      )
+      localStorage.removeItem('adminLoggedIn')
+      localStorage.removeItem('adminSessionToken')
 
       window.location.href =
         '/admin/admin-login.html'
@@ -324,152 +564,473 @@ content="width=device-width, initial-scale=1.0"
 
   </script>
 
+
+  <!-- =========================
+       ADMIN HEADER
+  ========================== -->
+
   <header class="admin-header">
 
-```
-<h1>🧑‍💼 Grocery Store Admin Panel</h1>
+    <h1>
+      🧑‍💼 Grocery Store Admin Panel
+    </h1>
 
-<p>Manage and view customer orders</p>
+    <p>
+      Manage products, customer orders and store administration
+    </p>
 
-<button
-  id="admin-logout"
-  style="
-    margin-top: 10px;
-    padding: 10px 18px;
-    border: none;
-    border-radius: 6px;
-    background: #dc3545;
-    color: white;
-    cursor: pointer;
-    font-size: 15px;
-  "
->
-  🚪 Logout
-</button>
-```
+    <button
+      id="admin-logout"
+      style="
+        margin-top: 10px;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 6px;
+        background: #dc3545;
+        color: white;
+        cursor: pointer;
+        font-size: 15px;
+      "
+    >
+      🚪 Logout
+    </button>
 
   </header>
 
+
   <main class="admin-container">
 
-```
-<!-- =========================
-     ADMIN LICENSE STATUS
-========================== -->
 
-<div
-  id="license-status"
-  style="
-    background: white;
-    padding: 18px 20px;
-    border-radius: 10px;
-    margin-bottom: 25px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    border-left: 5px solid #198754;
-  "
->
+    <!-- =========================
+         ADMIN LICENSE STATUS
+    ========================== -->
 
-  <h3 style="margin: 0 0 10px;">
-    🔐 Admin License
-  </h3>
+    <div
+      id="license-status"
+      style="
+        background: white;
+        padding: 18px 20px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border-left: 5px solid #198754;
+      "
+    >
 
-  <div id="license-info">
-    Checking license...
-  </div>
+      <h3 style="margin: 0 0 10px;">
+        🔐 Admin License
+      </h3>
 
-</div>
+      <div id="license-info">
+        Checking license...
+      </div>
 
-
-<div class="stats">
-
-  <div class="stat-card">
-
-    <h3>
-      Total Orders
-    </h3>
-
-    <strong id="total-orders">
-      0
-    </strong>
-
-  </div>
+    </div>
 
 
-  <div class="stat-card">
+    <!-- =========================
+         ORDER STATS
+    ========================== -->
 
-    <h3>
-      Total Sales
-    </h3>
+    <div class="stats">
 
-    <strong id="total-sales">
-      Rs. 0
-    </strong>
+      <div class="stat-card">
 
-  </div>
+        <h3>
+          Total Orders
+        </h3>
 
-</div>
+        <strong id="total-orders">
+          0
+        </strong>
 
-
-<button
-  id="refresh-orders"
-  class="refresh-button"
->
-  🔄 Refresh Orders
-</button>
+      </div>
 
 
-<input
-  type="text"
-  id="order-search"
-  class="search-input"
-  placeholder="🔍 Search by order number, name, phone, address or product..."
->
+      <div class="stat-card">
+
+        <h3>
+          Total Sales
+        </h3>
+
+        <strong id="total-sales">
+          Rs. 0
+        </strong>
+
+      </div>
+
+    </div>
 
 
-<section class="orders-box">
+    <!-- =========================
+         PRODUCT MANAGEMENT
+    ========================== -->
 
-  <h2>
-    📦 Customer Orders
-  </h2>
+    <section class="products-box">
 
-  <div id="orders-container">
+      <h2 class="section-title">
+        🛍️ Product Management
+      </h2>
 
-    <div class="empty">
-      Loading orders...
+
+      <!-- ADD PRODUCT -->
+
+      <h3>
+        ➕ Add Product
+      </h3>
+
+
+      <div class="product-form">
+
+
+        <div class="form-group">
+
+          <label for="product-name">
+            Product Name
+          </label>
+
+          <input
+            type="text"
+            id="product-name"
+            placeholder="Example: Apple"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="product-price">
+            Price
+          </label>
+
+          <input
+            type="number"
+            id="product-price"
+            placeholder="Example: 250"
+            min="0"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="product-category">
+            Category
+          </label>
+
+          <select id="product-category">
+
+            <option value="Fruits">
+              Fruits
+            </option>
+
+            <option value="Vegetables">
+              Vegetables
+            </option>
+
+            <option value="Dairy">
+              Dairy
+            </option>
+
+            <option value="Bakery">
+              Bakery
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="product-unit">
+            Unit
+          </label>
+
+          <input
+            type="text"
+            id="product-unit"
+            placeholder="Example: kg"
+          >
+
+        </div>
+
+
+        <!-- =====================================
+             PRODUCT IMAGE - COMPUTER FILE
+        ====================================== -->
+
+        <div class="form-group">
+
+          <label for="product-image">
+            Product Image
+          </label>
+
+          <input
+            type="file"
+            id="product-image"
+            accept="image/*"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="product-stock">
+            Stock
+          </label>
+
+          <input
+            type="number"
+            id="product-stock"
+            placeholder="Example: 100"
+            min="0"
+          >
+
+        </div>
+
+
+        <div class="form-group full-width">
+
+          <button
+            type="button"
+            id="add-product-button"
+          >
+            ➕ Add Product
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =========================
+           EXISTING PRODUCTS
+      ========================== -->
+
+      <h3>
+        📦 Existing Products
+      </h3>
+
+
+      <div id="admin-products-list">
+
+        <div class="empty">
+          Loading products...
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         ORDERS
+    ========================== -->
+
+    <button
+      id="refresh-orders"
+      class="refresh-button"
+    >
+      🔄 Refresh Orders
+    </button>
+
+
+    <input
+      type="text"
+      id="order-search"
+      class="search-input"
+      placeholder="🔍 Search by order number, name, phone, address or product..."
+    >
+
+
+    <section class="orders-box">
+
+      <h2 class="section-title">
+        📦 Customer Orders
+      </h2>
+
+      <div id="orders-container">
+
+        <div class="empty">
+          Loading orders...
+        </div>
+
+      </div>
+
+    </section>
+
+
+  </main>
+
+
+  <!-- =========================
+       ORDER DETAILS MODAL
+  ========================== -->
+
+  <div id="order-modal">
+
+    <div class="modal-box">
+
+      <div class="modal-header">
+
+        <h2 id="modal-order-number">
+          Order Details
+        </h2>
+
+        <button
+          id="close-order-modal"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div id="order-details-content"></div>
+
     </div>
 
   </div>
 
-</section>
-```
 
-  </main>
+  <!-- =========================
+       EDIT PRODUCT MODAL
+  ========================== -->
 
-  <div id="order-modal">
+  <div id="edit-product-modal">
 
-```
-<div class="modal-box">
+    <div class="modal-box">
 
-  <div class="modal-header">
+      <div class="modal-header">
 
-    <h2 id="modal-order-number">
-      Order Details
-    </h2>
+        <h2>
+          ✏️ Edit Product
+        </h2>
 
-    <button
-      id="close-order-modal"
-    >
-      ×
-    </button>
+        <button
+          id="close-edit-product-modal"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="edit-form">
+
+
+        <label>
+
+          Product Name
+
+          <input
+            type="text"
+            id="edit-product-name"
+          >
+
+        </label>
+
+
+        <label>
+
+          Price
+
+          <input
+            type="number"
+            id="edit-product-price"
+            min="0"
+          >
+
+        </label>
+
+
+        <label>
+
+          Category
+
+          <select id="edit-product-category">
+
+            <option value="Fruits">
+              Fruits
+            </option>
+
+            <option value="Vegetables">
+              Vegetables
+            </option>
+
+            <option value="Dairy">
+              Dairy
+            </option>
+
+            <option value="Bakery">
+              Bakery
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label>
+
+          Unit
+
+          <input
+            type="text"
+            id="edit-product-unit"
+          >
+
+        </label>
+
+
+        <!-- EDIT IMAGE FROM COMPUTER -->
+
+        <label>
+
+          Product Image
+
+          <input
+            type="file"
+            id="edit-product-image"
+            accept="image/*"
+          >
+
+        </label>
+
+
+        <label>
+
+          Stock
+
+          <input
+            type="number"
+            id="edit-product-stock"
+            min="0"
+          >
+
+        </label>
+
+
+        <button
+          type="button"
+          id="save-edit-product-button"
+        >
+          💾 Save Changes
+        </button>
+
+      </div>
+
+    </div>
 
   </div>
 
-  <div id="order-details-content"></div>
 
-</div>
-```
-
-  </div>
+  <!-- =========================
+       ADMIN ORDERS SCRIPT
+  ========================== -->
 
   <script type="module">
 
@@ -539,7 +1100,6 @@ content="width=device-width, initial-scale=1.0"
         )
 
 
-      // Server ne session reject kiya
       if (
         response.status === 401
       ) {
@@ -568,7 +1128,7 @@ content="width=device-width, initial-scale=1.0"
 
 
     // ==================================================
-    // ADMIN LICENSE STATUS + EXPIRY ENFORCEMENT
+    // LICENSE STATUS
     // ==================================================
 
     async function loadLicenseStatus() {
@@ -586,7 +1146,6 @@ content="width=device-width, initial-scale=1.0"
 
       try {
 
-        // License status public endpoint hai
         const response =
           await fetch(
             `${API_URL}/api/admin/license-status`
@@ -600,9 +1159,7 @@ content="width=device-width, initial-scale=1.0"
         if (!response.ok) {
 
           info.innerHTML =
-            `
-            ⚠️ Could not check license status.
-            `
+            '⚠️ Could not check license status.'
 
           box.style.borderLeftColor =
             '#ffc107'
@@ -612,14 +1169,13 @@ content="width=device-width, initial-scale=1.0"
         }
 
 
-        // License expired
         if (
           data.expired === true ||
           data.active === false
         ) {
 
-          info.innerHTML =
-            `
+          info.innerHTML = `
+
             <strong style="color:#dc3545;">
               ❌ License Expired
             </strong>
@@ -645,7 +1201,8 @@ content="width=device-width, initial-scale=1.0"
             <strong>
               Redirecting to Admin Login...
             </strong>
-            `
+
+          `
 
           box.style.borderLeftColor =
             '#dc3545'
@@ -673,13 +1230,12 @@ content="width=device-width, initial-scale=1.0"
         }
 
 
-        // License not activated
         if (
           data.success !== true
         ) {
 
-          info.innerHTML =
-            `
+          info.innerHTML = `
+
             <strong style="color:#dc3545;">
               ❌ License is not activated.
             </strong>
@@ -687,7 +1243,8 @@ content="width=device-width, initial-scale=1.0"
             <br><br>
 
             Redirecting to Admin Login...
-            `
+
+          `
 
           box.style.borderLeftColor =
             '#dc3545'
@@ -715,15 +1272,14 @@ content="width=device-width, initial-scale=1.0"
         }
 
 
-        // License active
         const expiry =
           new Date(
             data.expiryDate
           )
 
 
-        info.innerHTML =
-          `
+        info.innerHTML = `
+
           <strong style="color:#198754;">
             ✅ License Active
           </strong>
@@ -739,7 +1295,8 @@ content="width=device-width, initial-scale=1.0"
           <strong>
             ${data.remainingDays} days remaining
           </strong>
-          `
+
+        `
 
         box.style.borderLeftColor =
           '#198754'
@@ -753,9 +1310,7 @@ content="width=device-width, initial-scale=1.0"
         )
 
         info.innerHTML =
-          `
-          ⚠️ Could not check license status.
-          `
+          '⚠️ Could not check license status.'
 
         box.style.borderLeftColor =
           '#ffc107'
@@ -782,7 +1337,6 @@ content="width=device-width, initial-scale=1.0"
 
       try {
 
-        // Protected admin endpoint
         const response =
           await adminFetch(
             `${API_URL}/api/orders`
@@ -886,9 +1440,7 @@ content="width=device-width, initial-scale=1.0"
         container.innerHTML = `
 
           <div class="empty">
-
             🔍 No matching orders found.
-
           </div>
 
         `
@@ -907,19 +1459,12 @@ content="width=device-width, initial-scale=1.0"
             <tr>
 
               <th>Order</th>
-
               <th>Customer</th>
-
               <th>Contact</th>
-
               <th>Address</th>
-
               <th>Products</th>
-
               <th>Payment</th>
-
               <th>Status</th>
-
               <th>Total</th>
 
             </tr>
@@ -994,9 +1539,7 @@ content="width=device-width, initial-scale=1.0"
 
 
                 <td>
-
                   ${order.paymentMethod || 'N/A'}
-
                 </td>
 
 
@@ -1165,8 +1708,7 @@ content="width=device-width, initial-scale=1.0"
     ) {
 
       if (
-        select.value ===
-        'Pending'
+        select.value === 'Pending'
       ) {
 
         select.style.background =
@@ -1175,8 +1717,7 @@ content="width=device-width, initial-scale=1.0"
       }
 
       else if (
-        select.value ===
-        'Confirmed'
+        select.value === 'Confirmed'
       ) {
 
         select.style.background =
@@ -1185,8 +1726,7 @@ content="width=device-width, initial-scale=1.0"
       }
 
       else if (
-        select.value ===
-        'Preparing'
+        select.value === 'Preparing'
       ) {
 
         select.style.background =
@@ -1195,8 +1735,7 @@ content="width=device-width, initial-scale=1.0"
       }
 
       else if (
-        select.value ===
-        'Out for Delivery'
+        select.value === 'Out for Delivery'
       ) {
 
         select.style.background =
@@ -1205,8 +1744,7 @@ content="width=device-width, initial-scale=1.0"
       }
 
       else if (
-        select.value ===
-        'Delivered'
+        select.value === 'Delivered'
       ) {
 
         select.style.background =
@@ -1215,8 +1753,7 @@ content="width=device-width, initial-scale=1.0"
       }
 
       else if (
-        select.value ===
-        'Cancelled'
+        select.value === 'Cancelled'
       ) {
 
         select.style.background =
@@ -1270,36 +1807,30 @@ content="width=device-width, initial-scale=1.0"
                   order.orderNumber || ''
                 ).toLowerCase()
 
-
               const name =
                 String(
                   order.name || ''
                 ).toLowerCase()
-
 
               const phone =
                 String(
                   order.phone || ''
                 ).toLowerCase()
 
-
               const address =
                 String(
                   order.address || ''
                 ).toLowerCase()
-
 
               const city =
                 String(
                   order.city || ''
                 ).toLowerCase()
 
-
               const payment =
                 String(
                   order.paymentMethod || ''
                 ).toLowerCase()
-
 
               const products =
                 (order.items || [])
@@ -1316,47 +1847,13 @@ content="width=device-width, initial-scale=1.0"
 
 
               return (
-
-                orderNumber.includes(
-                  searchText
-                )
-
-                ||
-
-                name.includes(
-                  searchText
-                )
-
-                ||
-
-                phone.includes(
-                  searchText
-                )
-
-                ||
-
-                address.includes(
-                  searchText
-                )
-
-                ||
-
-                city.includes(
-                  searchText
-                )
-
-                ||
-
-                payment.includes(
-                  searchText
-                )
-
-                ||
-
-                products.includes(
-                  searchText
-                )
-
+                orderNumber.includes(searchText) ||
+                name.includes(searchText) ||
+                phone.includes(searchText) ||
+                address.includes(searchText) ||
+                city.includes(searchText) ||
+                payment.includes(searchText) ||
+                products.includes(searchText)
               )
 
             }
@@ -1397,7 +1894,6 @@ content="width=device-width, initial-scale=1.0"
         const orderNumber =
           target.dataset.order
 
-
         const status =
           target.value
 
@@ -1418,7 +1914,7 @@ content="width=device-width, initial-scale=1.0"
 
                 body:
                   JSON.stringify({
-                    status: status
+                    status
                   })
 
               }
@@ -1467,12 +1963,10 @@ content="width=device-width, initial-scale=1.0"
             error
           )
 
-
           alert(
             error.message ||
             'Could not update order status.'
           )
-
 
           await loadOrders()
 
@@ -1583,6 +2077,7 @@ content="width=device-width, initial-scale=1.0"
             (order.items || [])
               .map(
                 item => `
+
                   <div class="order-product-card">
 
                     <span>
@@ -1595,6 +2090,7 @@ content="width=device-width, initial-scale=1.0"
                     </strong>
 
                   </div>
+
                 `
               )
               .join('')
@@ -1623,7 +2119,7 @@ content="width=device-width, initial-scale=1.0"
 
 
     // ==================================================
-    // CLOSE MODAL
+    // CLOSE ORDER MODAL
     // ==================================================
 
     document
@@ -1694,13 +2190,11 @@ content="width=device-width, initial-scale=1.0"
           target.dataset.order
 
 
-        const confirmCancel =
-          confirm(
+        if (
+          !confirm(
             `Are you sure you want to cancel order #${orderNumber}?`
           )
-
-
-        if (!confirmCancel) {
+        ) {
 
           return
 
@@ -1723,8 +2217,7 @@ content="width=device-width, initial-scale=1.0"
 
                 body:
                   JSON.stringify({
-                    status:
-                      'Cancelled'
+                    status: 'Cancelled'
                   })
 
               }
@@ -1759,7 +2252,6 @@ content="width=device-width, initial-scale=1.0"
             'Cancel order failed:',
             error
           )
-
 
           alert(
             error.message ||
@@ -1815,13 +2307,8 @@ content="width=device-width, initial-scale=1.0"
 
                 body:
                   JSON.stringify({
-
-                    status:
-                      'Confirmed',
-
-                    locked:
-                      false
-
+                    status: 'Confirmed',
+                    locked: false
                   })
 
               }
@@ -1856,7 +2343,6 @@ content="width=device-width, initial-scale=1.0"
             'Reopen order failed:',
             error
           )
-
 
           alert(
             error.message ||
@@ -1896,13 +2382,11 @@ content="width=device-width, initial-scale=1.0"
           target.dataset.order
 
 
-        const confirmLock =
-          confirm(
+        if (
+          !confirm(
             `Are you sure you want to LOCK order #${orderNumber}?`
           )
-
-
-        if (!confirmLock) {
+        ) {
 
           return
 
@@ -1961,7 +2445,6 @@ content="width=device-width, initial-scale=1.0"
             error
           )
 
-
           alert(
             error.message ||
             'Could not lock the order.'
@@ -2000,13 +2483,11 @@ content="width=device-width, initial-scale=1.0"
           target.dataset.order
 
 
-        const confirmUnlock =
-          confirm(
+        if (
+          !confirm(
             `Are you sure you want to UNLOCK order #${orderNumber}?`
           )
-
-
-        if (!confirmUnlock) {
+        ) {
 
           return
 
@@ -2064,7 +2545,6 @@ content="width=device-width, initial-scale=1.0"
             'Unlock order failed:',
             error
           )
-
 
           alert(
             error.message ||
@@ -2132,13 +2612,23 @@ content="width=device-width, initial-scale=1.0"
     loadOrders()
 
 
-    // Check license every hour
     setInterval(
       loadLicenseStatus,
       60 * 60 * 1000
     )
 
   </script>
+
+
+  <!-- =========================
+       PRODUCT MANAGEMENT SCRIPT
+  ========================== -->
+
+  <script
+    type="module"
+    src="/src/admin-products.ts"
+  ></script>
+
 
 </body>
 
