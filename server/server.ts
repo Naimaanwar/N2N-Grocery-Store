@@ -2485,3 +2485,20 @@ app.get(
     `)
   }
 )
+
+// ==================================================
+// START WHATSAPP AUTOMATICALLY
+// ==================================================
+
+setTimeout(
+  () => {
+
+    console.log(
+      'Starting WhatsApp automatically...'
+    )
+
+    whatsapp.startWhatsApp()
+
+  },
+  3000
+)
