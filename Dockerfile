@@ -51,4 +51,4 @@ RUN npm run build
 
 ENV NODE_ENV=production
 
-CMD ["npx", "tsx", "server/server.ts"]
+CMD ["npm", "start"]
