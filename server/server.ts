@@ -1,4 +1,5 @@
 import 'dotenv/config'
+
 import crypto from 'crypto'
 import express from 'express'
 import cors from 'cors'
@@ -19,6 +20,10 @@ const whatsapp = await import('./whatsapp')
 
 sendWhatsAppMessage =
   whatsapp.sendWhatsAppMessage
+
+// Render detection
+const isRender =
+  process.env.RENDER === 'true'
 
 // ==================================================
 // EXPRESS
@@ -152,7 +157,6 @@ function saveProductImage(
 
 const db =
   mysql.createPool({
-
     host:
       process.env.DB_HOST,
 
@@ -175,9 +179,7 @@ const db =
     },
 
     waitForConnections: true,
-
     connectionLimit: 10,
-
     queueLimit: 0
   })
 
@@ -222,6 +224,7 @@ async function testDatabase() {
       'MySQL Connection Failed:',
       error
     )
+
   }
 }
 
@@ -255,20 +258,17 @@ function requireAdminSession(
   ) {
 
     return res.status(401).json({
-
       success: false,
-
       message:
         'Admin session required'
-
     })
 
   }
 
   const token =
-    authorization.substring(
-      7
-    ).trim()
+    authorization
+      .substring(7)
+      .trim()
 
   if (
     !token ||
@@ -276,12 +276,9 @@ function requireAdminSession(
   ) {
 
     return res.status(401).json({
-
       success: false,
-
       message:
         'Invalid or expired admin session'
-
     })
 
   }
@@ -352,7 +349,9 @@ app.post(
 
           nextNumber =
             lastNumber + 1
+
         }
+
       }
 
       const orderNumber =
@@ -385,6 +384,7 @@ app.post(
           message:
             'Required order information missing'
         })
+
       }
 
       // ==================================================
@@ -417,6 +417,7 @@ app.post(
           throw new Error(
             'Invalid product or quantity'
           )
+
         }
 
         const [productRows] =
@@ -443,6 +444,7 @@ app.post(
           throw new Error(
             `Product not found: ${productCode}`
           )
+
         }
 
         const product =
@@ -457,7 +459,9 @@ app.post(
           throw new Error(
             `${product.name} has only ${product.stock} item(s) available.`
           )
+
         }
+
       }
 
       // ==================================================
@@ -520,6 +524,7 @@ app.post(
             item.id
           ]
         )
+
       }
 
       // ==================================================
@@ -555,38 +560,49 @@ app.post(
         `Preparing WhatsApp CUSTOMER message for ${order.phone}...`
       )
 
-      sendWhatsAppMessage(
-        order.phone,
-        pendingMessage
-      )
-        .then(
-          (whatsappSent) => {
+      if (isRender) {
 
-            if (
-              whatsappSent
-            ) {
+        console.log(
+          `Render: WhatsApp CUSTOMER message skipped for ${order.orderNumber}.`
+        )
 
-              console.log(
-                `WhatsApp CUSTOMER message sent for ${order.orderNumber} ✅`
-              )
+      } else {
 
-            } else {
+        sendWhatsAppMessage(
+          order.phone,
+          pendingMessage
+        )
+          .then(
+            (whatsappSent) => {
 
-              console.log(
-                `WhatsApp CUSTOMER message failed for ${order.orderNumber} ❌`
-              )
+              if (whatsappSent) {
+
+                console.log(
+                  `WhatsApp CUSTOMER message sent for ${order.orderNumber} ✅`
+                )
+
+              } else {
+
+                console.log(
+                  `WhatsApp CUSTOMER message failed for ${order.orderNumber} ❌`
+                )
+
+              }
+
             }
-          }
-        )
-        .catch(
-          (error) => {
+          )
+          .catch(
+            (error) => {
 
-            console.error(
-              `Customer WhatsApp error for ${order.orderNumber}:`,
-              error
-            )
-          }
-        )
+              console.error(
+                `Customer WhatsApp error for ${order.orderNumber}:`,
+                error
+              )
+
+            }
+          )
+
+      }
 
       // ==================================================
       // ADMIN WHATSAPP
@@ -608,6 +624,7 @@ app.post(
               return (
                 `• ${itemName} × ${item.quantity}`
               )
+
             }
           )
           .join('\n')
@@ -629,38 +646,51 @@ app.post(
         'Sending ADMIN WhatsApp notification...'
       )
 
-      sendWhatsAppMessage(
-        adminWhatsAppNumber,
-        adminMessage
-      )
-        .then(
-          (adminWhatsAppSent) => {
+      if (isRender) {
 
-            if (
-              adminWhatsAppSent
-            ) {
+        console.log(
+          `Render: WhatsApp ADMIN notification skipped for ${order.orderNumber}.`
+        )
 
-              console.log(
-                `WhatsApp ADMIN notification sent for ${order.orderNumber} ✅`
-              )
+      } else {
 
-            } else {
+        sendWhatsAppMessage(
+          adminWhatsAppNumber,
+          adminMessage
+        )
+          .then(
+            (adminWhatsAppSent) => {
 
-              console.log(
-                `WhatsApp ADMIN notification failed for ${order.orderNumber} ❌`
-              )
+              if (
+                adminWhatsAppSent
+              ) {
+
+                console.log(
+                  `WhatsApp ADMIN notification sent for ${order.orderNumber} ✅`
+                )
+
+              } else {
+
+                console.log(
+                  `WhatsApp ADMIN notification failed for ${order.orderNumber} ❌`
+                )
+
+              }
+
             }
-          }
-        )
-        .catch(
-          (error) => {
+          )
+          .catch(
+            (error) => {
 
-            console.error(
-              `ADMIN WhatsApp error for ${order.orderNumber}:`,
-              error
-            )
-          }
-        )
+              console.error(
+                `ADMIN WhatsApp error for ${order.orderNumber}:`,
+                error
+              )
+
+            }
+          )
+
+      }
 
       // ==================================================
       // IMMEDIATE RESPONSE
@@ -675,6 +705,7 @@ app.post(
 
         orderNumber:
           order.orderNumber
+
       })
 
     } catch (error) {
@@ -700,8 +731,11 @@ app.post(
           error instanceof Error
             ? error.message
             : 'Failed to place order'
+
       })
+
     }
+
   }
 )
 
@@ -726,15 +760,19 @@ app.post(
       ) {
 
         return res.status(400).json({
+
           success: false,
+
           message:
             'Invalid license key'
+
         })
+
       }
 
-      const now = new Date()
+      const now =
+        new Date()
 
-      // Check existing active license
       const [existingRows] =
         await db.query(`
           SELECT expiry_date
@@ -747,17 +785,17 @@ app.post(
       const existingLicenses =
         existingRows as any[]
 
-      let startDate = now
+      let startDate =
+        now
 
-      // Agar current license abhi active hai,
-      // renewal current expiry ke baad start hogi.
       if (
         existingLicenses.length > 0
       ) {
 
         const currentExpiry =
           new Date(
-            existingLicenses[0].expiry_date
+            existingLicenses[0]
+              .expiry_date
           )
 
         if (
@@ -766,7 +804,9 @@ app.post(
 
           startDate =
             currentExpiry
+
         }
+
       }
 
       const expiryDate =
@@ -778,14 +818,12 @@ app.post(
         expiryDate.getFullYear() + 1
       )
 
-      // Deactivate old licenses
       await db.query(`
         UPDATE admin_license
         SET active = FALSE
         WHERE active = TRUE
       `)
 
-      // Add new license
       await db.query(
         `
         INSERT INTO admin_license
@@ -812,6 +850,7 @@ app.post(
           'License activated successfully',
 
         expiryDate
+
       })
 
     } catch (error) {
@@ -827,8 +866,11 @@ app.post(
 
         message:
           'License activation failed'
+
       })
+
     }
+
   }
 )
 
@@ -859,16 +901,19 @@ app.get(
       const licenses =
         licenseRows as any[]
 
-      // No license found
       if (
         licenses.length === 0
       ) {
 
         return res.json({
+
           success: false,
+
           active: false,
+
           message:
             'Admin license is not activated'
+
         })
 
       }
@@ -884,7 +929,6 @@ app.get(
           license.expiry_date
         )
 
-      // Calculate remaining time
       const difference =
         expiryDate.getTime() -
         now.getTime()
@@ -898,7 +942,6 @@ app.get(
           )
         )
 
-      // License expired
       if (
         difference <= 0
       ) {
@@ -932,7 +975,6 @@ app.get(
 
       }
 
-      // License active
       return res.json({
 
         success: true,
@@ -990,10 +1032,6 @@ app.post(
         password
       } = req.body
 
-      // ==================================================
-      // CHECK USERNAME + PASSWORD
-      // ==================================================
-
       if (
         username !== 'admin' ||
         password !== 'N2N@Admin123'
@@ -1005,12 +1043,10 @@ app.post(
 
           message:
             'Invalid username or password'
-        })
-      }
 
-      // ==================================================
-      // GET ACTIVE LICENSE
-      // ==================================================
+        })
+
+      }
 
       const [licenseRows] =
         await db.query(`
@@ -1029,10 +1065,6 @@ app.post(
       const licenses =
         licenseRows as any[]
 
-      // ==================================================
-      // NO LICENSE
-      // ==================================================
-
       if (
         licenses.length === 0
       ) {
@@ -1043,15 +1075,13 @@ app.post(
 
           message:
             'Admin license is not activated'
+
         })
+
       }
 
       const license =
         licenses[0]
-
-      // ==================================================
-      // CHECK EXPIRY
-      // ==================================================
 
       const now =
         new Date()
@@ -1065,7 +1095,6 @@ app.post(
         now >= expiryDate
       ) {
 
-        // Automatically deactivate expired license
         await db.query(
           `
           UPDATE admin_license
@@ -1081,12 +1110,10 @@ app.post(
 
           message:
             'Admin license has expired'
-        })
-      }
 
-      // ==================================================
-      // CREATE SECURE SESSION TOKEN
-      // ==================================================
+        })
+
+      }
 
       const sessionToken =
         crypto
@@ -1096,10 +1123,6 @@ app.post(
       adminSessions.add(
         sessionToken
       )
-
-      // ==================================================
-      // LOGIN SUCCESS
-      // ==================================================
 
       return res.json({
 
@@ -1112,6 +1135,7 @@ app.post(
           license.expiry_date,
 
         sessionToken
+
       })
 
     } catch (error) {
@@ -1127,8 +1151,11 @@ app.post(
 
         message:
           'Admin login failed'
+
       })
+
     }
+
   }
 )
 
@@ -1165,8 +1192,11 @@ app.get(
 
         message:
           'Products fetch failed'
+
       })
+
     }
+
   }
 )
 
@@ -1204,7 +1234,9 @@ app.post(
 
           message:
             'Required product fields missing'
+
         })
+
       }
 
       let savedImage = ''
@@ -1229,6 +1261,7 @@ app.post(
 
         savedImage =
           image || ''
+
       }
 
       const [result] =
@@ -1284,7 +1317,9 @@ app.post(
 
           unit:
             unit || ''
+
         }
+
       })
 
     } catch (error) {
@@ -1300,8 +1335,11 @@ app.post(
           error instanceof Error
             ? error.message
             : 'Product add failed'
+
       })
+
     }
+
   }
 )
 
@@ -1341,7 +1379,9 @@ app.put(
 
           message:
             'Required product fields missing'
+
         })
+
       }
 
       const [existingRows] =
@@ -1366,7 +1406,9 @@ app.put(
 
           message:
             'Product not found'
+
         })
+
       }
 
       const oldImage =
@@ -1391,6 +1433,7 @@ app.put(
               'product'
             )
           )
+
       }
 
       await db.query(
@@ -1423,6 +1466,7 @@ app.put(
 
         image:
           savedImage
+
       })
 
     } catch (error) {
@@ -1438,8 +1482,11 @@ app.put(
           error instanceof Error
             ? error.message
             : 'Product update failed'
+
       })
+
     }
+
   }
 )
 
@@ -1468,6 +1515,7 @@ app.delete(
 
         message:
           'Product deleted successfully'
+
       })
 
     } catch (error) {
@@ -1481,8 +1529,11 @@ app.delete(
 
         message:
           'Product delete failed'
+
       })
+
     }
+
   }
 )
 
@@ -1555,6 +1606,7 @@ app.get(
                       order.items
                     )
                   )
+
               }
 
             } catch (parseError) {
@@ -1565,6 +1617,7 @@ app.get(
               )
 
               parsedItems = []
+
             }
 
             return {
@@ -1608,7 +1661,9 @@ app.get(
               locked:
                 order.locked === 1 ||
                 order.locked === true
+
             }
+
           }
         )
 
@@ -1631,16 +1686,14 @@ app.get(
 
         message:
           'Failed to fetch orders'
+
       })
+
     }
+
   }
 )
 
-// ==================================================
-// GET SINGLE ORDER
-// CUSTOMER TRACKING + ADMIN DETAIL
-// PUBLIC ROUTE
-// ==================================================
 // ==================================================
 // GET MY ORDERS
 // CUSTOMER ORDERS ONLY
@@ -1654,12 +1707,19 @@ app.get(
     try {
 
       const phone =
-        String(req.query.phone || '').trim()
+        String(
+          req.query.phone || ''
+        ).trim()
 
       const name =
-        String(req.query.name || '').trim()
+        String(
+          req.query.name || ''
+        ).trim()
 
-      if (!phone && !name) {
+      if (
+        !phone &&
+        !name
+      ) {
 
         return res.status(400).json({
 
@@ -1667,7 +1727,9 @@ app.get(
 
           message:
             'Customer information required'
+
         })
+
       }
 
       let query = `
@@ -1685,13 +1747,16 @@ app.get(
           status,
           locked
         FROM orders
-        WHERE
-          phone = ?
+        WHERE phone = ?
       `
 
-      const params: any[] = [phone]
+      const params: any[] =
+        [phone]
 
-      if (!phone && name) {
+      if (
+        !phone &&
+        name
+      ) {
 
         query = `
           SELECT
@@ -1712,7 +1777,9 @@ app.get(
         `
 
         params.length = 0
+
         params.push(name)
+
       }
 
       query += `
@@ -1729,7 +1796,8 @@ app.get(
         (rows as any[]).map(
           (order) => {
 
-            let parsedItems: any[] = []
+            let parsedItems: any[] =
+              []
 
             try {
 
@@ -1762,6 +1830,7 @@ app.get(
                       order.items
                     )
                   )
+
               }
 
             } catch (parseError) {
@@ -1772,6 +1841,7 @@ app.get(
               )
 
               parsedItems = []
+
             }
 
             return {
@@ -1815,7 +1885,9 @@ app.get(
               locked:
                 order.locked === 1 ||
                 order.locked === true
+
             }
+
           }
         )
 
@@ -1838,10 +1910,20 @@ app.get(
 
         message:
           'Failed to fetch customer orders'
+
       })
+
     }
+
   }
 )
+
+// ==================================================
+// GET SINGLE ORDER
+// CUSTOMER TRACKING + ADMIN DETAIL
+// PUBLIC ROUTE
+// ==================================================
+
 app.get(
   '/api/orders/:orderNumber',
   async (req, res) => {
@@ -1887,7 +1969,9 @@ app.get(
 
           message:
             'Order not found'
+
         })
+
       }
 
       const order = {
@@ -1901,6 +1985,7 @@ app.get(
                 result[0].items
               )
             : result[0].items
+
       }
 
       res.json({
@@ -1908,6 +1993,7 @@ app.get(
         success: true,
 
         order
+
       })
 
     } catch (error) {
@@ -1923,8 +2009,11 @@ app.get(
 
         message:
           'Failed to fetch order'
+
       })
+
     }
+
   }
 )
 
@@ -1977,7 +2066,9 @@ app.patch(
 
           message:
             'Order not found'
+
         })
+
       }
 
       const currentOrder =
@@ -2010,7 +2101,9 @@ app.patch(
 
           message:
             'Order unlocked successfully'
+
         })
+
       }
 
       // ==================================================
@@ -2028,7 +2121,9 @@ app.patch(
 
           message:
             'This order is locked and cannot be changed.'
+
         })
+
       }
 
       // ==================================================
@@ -2092,6 +2187,7 @@ app.patch(
             orderNumber
           ]
         )
+
       }
 
       // ==================================================
@@ -2178,6 +2274,7 @@ app.patch(
             `Your order #${orderNumber} has been Cancelled.\n\n` +
             `If you have any questions, please contact us.\n\n` +
             `Thank you.`
+
         }
 
         // ==================================================
@@ -2188,43 +2285,58 @@ app.patch(
           message
         ) {
 
-          console.log(
-            `Preparing WhatsApp status message for ${currentOrder.phone}...`
-          )
+          if (isRender) {
 
-          sendWhatsAppMessage(
-            currentOrder.phone,
-            message
-          )
-            .then(
-              (whatsappSent) => {
+            console.log(
+              `Render: WhatsApp status message skipped for ${orderNumber}.`
+            )
 
-                if (
-                  whatsappSent
-                ) {
+          } else {
 
-                  console.log(
-                    `WhatsApp status message sent for ${orderNumber} ✅`
-                  )
+            console.log(
+              `Preparing WhatsApp status message for ${currentOrder.phone}...`
+            )
 
-                } else {
+            sendWhatsAppMessage(
+              currentOrder.phone,
+              message
+            )
+              .then(
+                (whatsappSent) => {
 
-                  console.log(
-                    `WhatsApp status message failed for ${orderNumber} ❌`
-                  )
+                  if (
+                    whatsappSent
+                  ) {
+
+                    console.log(
+                      `WhatsApp status message sent for ${orderNumber} ✅`
+                    )
+
+                  } else {
+
+                    console.log(
+                      `WhatsApp status message failed for ${orderNumber} ❌`
+                    )
+
+                  }
+
                 }
-              }
-            )
-            .catch(
-              (error) => {
+              )
+              .catch(
+                (error) => {
 
-                console.error(
-                  `WhatsApp status error for ${orderNumber}:`,
-                  error
-                )
-              }
-            )
+                  console.error(
+                    `WhatsApp status error for ${orderNumber}:`,
+                    error
+                  )
+
+                }
+              )
+
+          }
+
         }
+
       }
 
       // ==================================================
@@ -2268,6 +2380,7 @@ app.patch(
                 updatedResult[0].items
               )
             : updatedResult[0].items
+
       }
 
       console.log(
@@ -2284,6 +2397,7 @@ app.patch(
 
         order:
           updatedOrder
+
       })
 
     } catch (error) {
@@ -2299,8 +2413,11 @@ app.patch(
 
         message:
           'Failed to update order'
+
       })
+
     }
+
   }
 )
 
@@ -2321,6 +2438,7 @@ app.listen(
     console.log(
       `Backend running on port ${PORT}`
     )
+
   }
 )
 
@@ -2336,7 +2454,44 @@ app.get(
       'WhatsApp QR page opened.'
     )
 
-    // WhatsApp manually start karein
+    // Render par WhatsApp start nahi hoga
+    if (isRender) {
+
+      return res.status(503).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>N2N WhatsApp</title>
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1"
+          >
+        </head>
+
+        <body
+          style="
+            font-family: Arial;
+            text-align: center;
+            padding: 40px;
+          "
+        >
+
+          <h2>
+            WhatsApp is disabled on Render
+          </h2>
+
+          <p>
+            WhatsApp is available when the N2N Grocery Store
+            backend is running locally.
+          </p>
+
+        </body>
+        </html>
+      `)
+
+    }
+
+    // Local par WhatsApp manually start karein
     whatsapp.startWhatsApp()
 
     // QR generate hone ka wait
@@ -2434,6 +2589,7 @@ app.get(
 
           </html>
         `)
+
       }
 
       await new Promise(
@@ -2443,6 +2599,7 @@ app.get(
             1000
           )
       )
+
     }
 
     return res.status(202).send(`
@@ -2483,22 +2640,34 @@ app.get(
 
       </html>
     `)
+
   }
 )
 
 // ==================================================
 // START WHATSAPP AUTOMATICALLY
+// LOCAL ONLY
 // ==================================================
 
-setTimeout(
-  () => {
+if (!isRender) {
 
-    console.log(
-      'Starting WhatsApp automatically...'
-    )
+  setTimeout(
+    () => {
 
-    whatsapp.startWhatsApp()
+      console.log(
+        'Starting WhatsApp automatically...'
+      )
 
-  },
-  3000
-)
+      whatsapp.startWhatsApp()
+
+    },
+    3000
+  )
+
+} else {
+
+  console.log(
+    'Render detected. WhatsApp auto-start disabled.'
+  )
+
+}
