@@ -397,22 +397,18 @@ async function reconnectWhatsApp(): Promise<boolean> {
  */
 export function startWhatsApp() {
 
-  if (
-    isInitializing ||
-    isReady
-  ) {
-
-    console.log(
-      'WhatsApp is already starting or ready.'
-    )
-
+  // Render par WhatsApp browser start nahi karna
+  if (process.env.RENDER === 'true') {
+    console.log('Render detected. WhatsApp startup disabled.')
     return
   }
 
-  console.log(
-    'Manual WhatsApp startup requested.'
-  )
+  if (isInitializing || isReady) {
+    console.log('WhatsApp is already starting or ready.')
+    return
+  }
 
+  console.log('Manual WhatsApp startup requested.')
   initializeWhatsApp()
 }
 
@@ -429,6 +425,11 @@ export async function sendWhatsAppMessage(
   phone: string,
   message: string
 ): Promise<boolean> {
+    // Render par WhatsApp messages skip karna
+  if (process.env.RENDER === 'true') {
+    console.log('Render detected. WhatsApp message skipped.')
+    return false
+  }
 
   let cleanPhone = phone.replace(/\D/g, '')
 
