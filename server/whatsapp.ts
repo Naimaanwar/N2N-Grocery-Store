@@ -10,12 +10,19 @@ let isReady = false
 let isInitializing = false
 let reconnecting = false
 
-const authPath = path.resolve('./server/.wwebjs_auth')
-const sessionPath = path.join(authPath, 'session')
+const authPath = path.resolve(
+  './server/.wwebjs_auth'
+)
 
-/*
- * Remove stale Chromium lock files.
- */
+const sessionPath = path.join(
+  authPath,
+  'session'
+)
+
+// ==================================================
+// REMOVE OLD CHROME LOCK FILES
+// ==================================================
+
 function removeStaleChromeLocks() {
 
   const lockFiles = [
@@ -24,22 +31,30 @@ function removeStaleChromeLocks() {
     'SingletonSocket'
   ]
 
-  for (const file of lockFiles) {
+  for (
+    const file of lockFiles
+  ) {
 
-    const filePath = path.join(
-      sessionPath,
-      file
-    )
+    const filePath =
+      path.join(
+        sessionPath,
+        file
+      )
 
     try {
 
-      if (fs.existsSync(filePath)) {
+      if (
+        fs.existsSync(filePath)
+      ) {
 
-        fs.unlinkSync(filePath)
+        fs.unlinkSync(
+          filePath
+        )
 
         console.log(
           `Removed old WhatsApp browser lock: ${file}`
         )
+
       }
 
     } catch (error) {
@@ -48,201 +63,302 @@ function removeStaleChromeLocks() {
         `Could not remove ${file}:`,
         error
       )
+
     }
+
   }
+
 }
 
-const client = new Client({
+// ==================================================
+// WHATSAPP CLIENT
+// ==================================================
 
-  authStrategy: new LocalAuth({
-    dataPath: authPath
-  }),
+const client =
+  new Client({
 
-  puppeteer: {
+    authStrategy:
+      new LocalAuth({
+        dataPath:
+          authPath
+      }),
 
-    headless: true,
+    puppeteer: {
 
-    executablePath:
-      process.env.PUPPETEER_EXECUTABLE_PATH ||
-      undefined,
+      headless: true,
 
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
-      '--disable-software-rasterizer',
-      '--disable-extensions',
-      '--disable-background-networking',
-      '--disable-background-timer-throttling',
-      '--disable-renderer-backgrounding',
-      '--disable-features=Translate,BackForwardCache',
-      '--no-first-run'
-    ]
+      executablePath:
+        process.env.PUPPETEER_EXECUTABLE_PATH ||
+        undefined,
 
-  }
+      args: [
 
-})
+        '--no-sandbox',
 
-/*
- * QR
- */
+        '--disable-setuid-sandbox',
+
+        '--disable-dev-shm-usage',
+
+        '--disable-gpu',
+
+        '--disable-software-rasterizer',
+
+        '--disable-extensions',
+
+        '--disable-background-networking',
+
+        '--disable-background-timer-throttling',
+
+        '--disable-renderer-backgrounding',
+
+        '--disable-features=Translate,BackForwardCache',
+
+        '--no-first-run',
+
+        '--no-default-browser-check',
+
+        '--disable-sync',
+
+        '--disable-translate',
+
+        '--disable-notifications',
+
+        '--disable-popup-blocking'
+
+      ]
+
+    }
+
+  })
+
+// ==================================================
+// QR CODE
+// ==================================================
+
 let currentQR = ''
 
-client.on('qr', async (qr) => {
-
-  console.log(
-    '\nNew WhatsApp QR code generated.'
-  )
-
-  qrcode.generate(
-    qr,
-    { small: true }
-  )
-
-  try {
-
-    currentQR =
-      await QRCode.toDataURL(qr)
+client.on(
+  'qr',
+  async (qr) => {
 
     console.log(
-      'WhatsApp QR image is ready.'
+      '\nNew WhatsApp QR code generated.'
     )
 
-  } catch (error) {
-
-    console.error(
-      'QR image generation failed:',
-      error
+    qrcode.generate(
+      qr,
+      {
+        small: true
+      }
     )
+
+    try {
+
+      currentQR =
+        await QRCode.toDataURL(
+          qr
+        )
+
+      console.log(
+        'WhatsApp QR image is ready.'
+      )
+
+    } catch (error) {
+
+      console.error(
+        'QR image generation failed:',
+        error
+      )
+
+    }
+
   }
-})
+)
+
+// ==================================================
+// GET QR
+// ==================================================
 
 export function getWhatsAppQR(): string {
 
   return currentQR
+
 }
 
-/*
- * Authentication
- */
-client.on('authenticated', () => {
+// ==================================================
+// AUTHENTICATED
+// ==================================================
 
-  console.log(
-    'WhatsApp authenticated ✅'
-  )
-})
-
-client.on('auth_failure', (message) => {
-
-  isReady = false
-
-  console.log(
-    'WhatsApp authentication failed:',
-    message
-  )
-})
-
-/*
- * Ready
- */
-client.on('ready', () => {
-
-  isReady = true
-  isInitializing = false
-  reconnecting = false
-
-  console.log(
-    '\nWhatsApp Web connected successfully! ✅'
-  )
-})
-
-/*
- * Disconnected
- */
-client.on('disconnected', async (reason) => {
-
-  isReady = false
-
-  console.log(
-    'WhatsApp disconnected:',
-    reason
-  )
-
-  if (!reconnecting) {
+client.on(
+  'authenticated',
+  () => {
 
     console.log(
-      'WhatsApp will attempt automatic reconnection... 🔄'
+      'WhatsApp authenticated ✅'
     )
 
-    setTimeout(() => {
-
-      reconnectWhatsApp()
-
-    }, 5000)
   }
-})
+)
 
-/*
- * WhatsApp state
- */
-client.on('change_state', (state) => {
+// ==================================================
+// AUTH FAILURE
+// ==================================================
 
-  console.log(
-    `WhatsApp state changed: ${state}`
+client.on(
+  'auth_failure',
+  (message) => {
+
+    isReady = false
+
+    console.log(
+      'WhatsApp authentication failed:',
+      message
+    )
+
+  }
+)
+
+// ==================================================
+// READY
+// ==================================================
+
+client.on(
+  'ready',
+  () => {
+
+    isReady = true
+
+    isInitializing = false
+
+    reconnecting = false
+
+    console.log(
+      '\nWhatsApp Web connected successfully! ✅'
+    )
+
+  }
+)
+
+// ==================================================
+// DISCONNECTED
+// ==================================================
+
+client.on(
+  'disconnected',
+  async (reason) => {
+
+    isReady = false
+
+    console.log(
+      'WhatsApp disconnected:',
+      reason
+    )
+
+    if (
+      !reconnecting
+    ) {
+
+      console.log(
+        'WhatsApp will attempt automatic reconnection... 🔄'
+      )
+
+      setTimeout(
+        () => {
+          reconnectWhatsApp()
+        },
+        5000
+      )
+
+    }
+
+  }
+)
+
+// ==================================================
+// STATE CHANGE
+// ==================================================
+
+client.on(
+  'change_state',
+  (state) => {
+
+    console.log(
+      `WhatsApp state changed: ${state}`
+    )
+
+  }
+)
+
+// ==================================================
+// SLEEP
+// ==================================================
+
+async function sleep(
+  ms: number
+) {
+
+  return new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        ms
+      )
   )
-})
 
-/*
- * Sleep helper
- */
-async function sleep(ms: number) {
-
-  return new Promise(resolve => {
-
-    setTimeout(resolve, ms)
-
-  })
 }
 
-/*
- * Wait until WhatsApp is ready.
- */
+// ==================================================
+// WAIT UNTIL READY
+// ==================================================
+
 async function waitUntilReady(
   timeout = 30000
 ): Promise<boolean> {
 
-  const start = Date.now()
+  const start =
+    Date.now()
 
   while (
-    Date.now() - start < timeout
+    Date.now() - start <
+    timeout
   ) {
 
-    if (isReady) {
+    if (
+      isReady
+    ) {
 
       return true
+
     }
 
-    await sleep(500)
+    await sleep(
+      500
+    )
+
   }
 
   return false
+
 }
 
-/*
- * Initialize WhatsApp safely.
- */
+// ==================================================
+// INITIALIZE WHATSAPP
+// ==================================================
+
 async function initializeWhatsApp(
   attempt = 1
 ) {
 
-  if (isInitializing) {
+  if (
+    isInitializing
+  ) {
 
     console.log(
       'WhatsApp initialization already running.'
     )
 
     return
+
   }
 
   isInitializing = true
@@ -253,9 +369,6 @@ async function initializeWhatsApp(
       `Starting WhatsApp Web... (attempt ${attempt})`
     )
 
-    /*
-     * Clean stale Chromium locks before startup.
-     */
     removeStaleChromeLocks()
 
     await client.initialize()
@@ -263,6 +376,7 @@ async function initializeWhatsApp(
   } catch (error) {
 
     isInitializing = false
+
     isReady = false
 
     console.error(
@@ -270,10 +384,9 @@ async function initializeWhatsApp(
       error
     )
 
-    /*
-     * Retry automatically.
-     */
-    if (attempt < 5) {
+    if (
+      attempt < 5
+    ) {
 
       const delay =
         Math.min(
@@ -285,13 +398,16 @@ async function initializeWhatsApp(
         `WhatsApp will retry in ${delay / 1000} seconds... 🔄`
       )
 
-      setTimeout(() => {
+      setTimeout(
+        () => {
 
-        initializeWhatsApp(
-          attempt + 1
-        )
+          initializeWhatsApp(
+            attempt + 1
+          )
 
-      }, delay)
+        },
+        delay
+      )
 
     } else {
 
@@ -300,27 +416,35 @@ async function initializeWhatsApp(
       )
 
       console.log(
-        'The backend will continue running. WhatsApp will be retried when needed.'
+        'The backend will continue running.'
       )
+
     }
+
   }
+
 }
 
-/*
- * Reconnect WhatsApp.
- */
+// ==================================================
+// RECONNECT WHATSAPP
+// ==================================================
+
 async function reconnectWhatsApp(): Promise<boolean> {
 
-  if (reconnecting) {
+  if (
+    reconnecting
+  ) {
 
     console.log(
       'WhatsApp reconnect already running.'
     )
 
     return false
+
   }
 
   reconnecting = true
+
   isReady = false
 
   console.log(
@@ -342,9 +466,12 @@ async function reconnectWhatsApp(): Promise<boolean> {
       console.log(
         'Old WhatsApp connection was already closed.'
       )
+
     }
 
-    await sleep(3000)
+    await sleep(
+      3000
+    )
 
     removeStaleChromeLocks()
 
@@ -353,9 +480,13 @@ async function reconnectWhatsApp(): Promise<boolean> {
     await initializeWhatsApp()
 
     const ready =
-      await waitUntilReady(30000)
+      await waitUntilReady(
+        30000
+      )
 
-    if (ready) {
+    if (
+      ready
+    ) {
 
       console.log(
         'WhatsApp connection restored! ✅'
@@ -364,6 +495,7 @@ async function reconnectWhatsApp(): Promise<boolean> {
       reconnecting = false
 
       return true
+
     }
 
     console.log(
@@ -384,69 +516,79 @@ async function reconnectWhatsApp(): Promise<boolean> {
     reconnecting = false
 
     return false
+
   }
+
 }
 
-/*
- * Start WhatsApp manually.
- *
- * Render startup par WhatsApp automatically
- * start nahi hoga.
- *
- * QR page se manually start kiya ja sakta hai.
- */
+// ==================================================
+// START WHATSAPP
+// ==================================================
+
 export function startWhatsApp() {
 
-  // Render par WhatsApp browser start nahi karna
-  if (process.env.RENDER === 'true') {
-    console.log('Render detected. WhatsApp startup disabled.')
+  if (
+    isInitializing ||
+    isReady
+  ) {
+
+    console.log(
+      'WhatsApp is already starting or ready.'
+    )
+
     return
+
   }
 
-  if (isInitializing || isReady) {
-    console.log('WhatsApp is already starting or ready.')
-    return
-  }
+  console.log(
+    'Manual WhatsApp startup requested.'
+  )
 
-  console.log('Manual WhatsApp startup requested.')
   initializeWhatsApp()
+
 }
 
-/*
- * Send WhatsApp message.
- *
- * Important:
- * ACK / delivery-status checking intentionally removed.
- *
- * WhatsApp LID chats mein sendMessage()
- * ke baad message ID reliable nahi hoti.
- */
+// ==================================================
+// SEND WHATSAPP MESSAGE
+// ==================================================
+
 export async function sendWhatsAppMessage(
   phone: string,
   message: string
 ): Promise<boolean> {
-    // Render par WhatsApp messages skip karna
-  if (process.env.RENDER === 'true') {
-    console.log('Render detected. WhatsApp message skipped.')
-    return false
-  }
 
-  let cleanPhone = phone.replace(/\D/g, '')
+  let cleanPhone =
+    phone.replace(
+      /\D/g,
+      ''
+    )
 
-  if (cleanPhone.startsWith('0')) {
+  if (
+    cleanPhone.startsWith('0')
+  ) {
 
     cleanPhone =
-      '92' + cleanPhone.substring(1)
+      '92' +
+      cleanPhone.substring(1)
+
   }
 
   console.log(
     `Preparing WhatsApp message for ${cleanPhone}...`
   )
 
-  let ready =
-    await waitUntilReady(30000)
+  // ==================================================
+  // WAIT FOR WHATSAPP
+  // ==================================================
 
-  if (!ready) {
+  let ready =
+    await waitUntilReady(
+      30000
+    )
+
+  if (
+    !ready
+  ) {
 
     console.log(
       'WhatsApp is not ready. Attempting automatic reconnect... 🔄'
@@ -454,44 +596,48 @@ export async function sendWhatsAppMessage(
 
     ready =
       await reconnectWhatsApp()
+
   }
 
-  if (!ready) {
+  if (
+    !ready
+  ) {
 
     console.log(
       'WhatsApp is not ready. Message not sent ❌'
     )
 
     return false
+
   }
+
+  // ==================================================
+  // SEND MESSAGE
+  // ==================================================
 
   try {
 
-    /*
-     * Check whether number is registered.
-     */
     const numberId =
-      await client.getNumberId(cleanPhone)
+      await client.getNumberId(
+        cleanPhone
+      )
 
-    if (!numberId) {
+    if (
+      !numberId
+    ) {
 
       console.log(
         `Number ${cleanPhone} is NOT registered on WhatsApp ❌`
       )
 
       return false
+
     }
 
     console.log(
       `Number ${cleanPhone} is registered on WhatsApp ✅`
     )
 
-    /*
-     * WhatsApp ka actual returned chat ID.
-     *
-     * Ye normal @c.us aur LID dono cases
-     * mein WhatsApp ke returned ID ko use karta hai.
-     */
     const actualChatId =
       numberId._serialized
 
@@ -499,17 +645,10 @@ export async function sendWhatsAppMessage(
       `Using WhatsApp chat ID: ${actualChatId}`
     )
 
-    /*
-     * Small delay before sending.
-     */
-    await sleep(1000)
+    await sleep(
+      1000
+    )
 
-    /*
-     * Send message.
-     *
-     * Agar ye successfully resolve ho jaye,
-     * WhatsApp ne message accept kar liya.
-     */
     await client.sendMessage(
       actualChatId,
       message
@@ -531,16 +670,26 @@ export async function sendWhatsAppMessage(
     const errorText =
       String(error)
 
-    /*
-     * Browser/session problems ke case mein
-     * automatic reconnect.
-     */
+    // ==================================================
+    // BROWSER CONNECTION ERROR
+    // ==================================================
+
     if (
-      errorText.includes('detached Frame') ||
-      errorText.includes('Target closed') ||
-      errorText.includes('Execution context was destroyed') ||
-      errorText.includes('Protocol error') ||
-      errorText.includes('Session closed')
+      errorText.includes(
+        'detached Frame'
+      ) ||
+      errorText.includes(
+        'Target closed'
+      ) ||
+      errorText.includes(
+        'Execution context was destroyed'
+      ) ||
+      errorText.includes(
+        'Protocol error'
+      ) ||
+      errorText.includes(
+        'Session closed'
+      )
     ) {
 
       console.log(
@@ -550,37 +699,41 @@ export async function sendWhatsAppMessage(
       const reconnected =
         await reconnectWhatsApp()
 
-      if (!reconnected) {
+      if (
+        !reconnected
+      ) {
 
         console.log(
           'WhatsApp reconnect failed ❌'
         )
 
         return false
+
       }
 
-      await sleep(3000)
+      await sleep(
+        3000
+      )
 
       try {
 
-        /*
-         * Reconnect ke baad number ID dobara obtain karein.
-         */
         const retryNumberId =
-          await client.getNumberId(cleanPhone)
+          await client.getNumberId(
+            cleanPhone
+          )
 
-        if (!retryNumberId) {
+        if (
+          !retryNumberId
+        ) {
 
           console.log(
             `Number ${cleanPhone} is NOT registered on WhatsApp after reconnect ❌`
           )
 
           return false
+
         }
 
-        /*
-         * Retry message using actual WhatsApp chat ID.
-         */
         await client.sendMessage(
           retryNumberId._serialized,
           message
@@ -592,7 +745,9 @@ export async function sendWhatsAppMessage(
 
         return true
 
-      } catch (retryError) {
+      } catch (
+        retryError
+      ) {
 
         console.error(
           `WhatsApp retry failed for ${cleanPhone}:`,
@@ -600,9 +755,13 @@ export async function sendWhatsAppMessage(
         )
 
         return false
+
       }
+
     }
 
     return false
+
   }
+
 }
