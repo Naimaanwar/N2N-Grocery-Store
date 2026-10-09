@@ -11,17 +11,99 @@ import path from 'path'
 // WHATSAPP
 // ==================================================
 
-let sendWhatsAppMessage: (
+let localSendWhatsAppMessage:
+  | ((phone: string, message: string) => Promise<boolean>)
+  | undefined
+
+let startWhatsApp: () => void = () => {}
+
+const isRender = process.env.RENDER === 'true'
+
+const bridgeUrl =
+  process.env.WHATSAPP_BRIDGE_URL?.replace(/\/+$/, '')
+
+const bridgeToken =
+  process.env.WHATSAPP_BRIDGE_TOKEN
+
+if (!isRender) {
+  // Local PC: use the existing WhatsApp session
+  const whatsapp = await import('./whatsapp')
+
+  localSendWhatsAppMessage =
+    whatsapp.sendWhatsAppMessage
+
+  startWhatsApp = whatsapp.startWhatsApp
+
+  console.log('Local WhatsApp mode enabled.')
+} else {
+  // Render: do not start a separate WhatsApp browser
+  console.log('Render detected. Using local WhatsApp bridge.')
+}
+
+const sendWhatsAppMessage = async (
   phone: string,
   message: string
-) => Promise<boolean>
+): Promise<boolean> => {
+  if (isRender) {
+    if (!bridgeUrl || !bridgeToken) {
+      console.error(
+        'WhatsApp bridge URL or token is missing on Render.'
+      )
+      return false
+    }
 
-const whatsapp = await import('./whatsapp')
+    try {
+      const response = await fetch(
+        `${bridgeUrl}/send`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${bridgeToken}`
+          },
+          body: JSON.stringify({
+            phone,
+            message
+          })
+        }
+      )
 
-sendWhatsAppMessage =
-  whatsapp.sendWhatsAppMessage
+      const result = await response.json() as {
+        success?: boolean
+        message?: string
+      }
 
-// ==================================================
+      if (!response.ok || result.success !== true) {
+        console.error(
+          'Remote WhatsApp bridge failed:',
+          result.message ?? response.status
+        )
+        return false
+      }
+
+      console.log(
+        'WhatsApp message sent through local bridge.'
+      )
+
+      return true
+    } catch (error) {
+      console.error(
+        'Could not reach the WhatsApp bridge:',
+        error
+      )
+      return false
+    }
+  }
+
+  if (!localSendWhatsAppMessage) {
+    console.error('Local WhatsApp sender is unavailable.')
+    return false
+  }
+
+  return localSendWhatsAppMessage(phone, message)
+}
+
+  // ==================================================
 // EXPRESS
 // ==================================================
 
@@ -33,8 +115,127 @@ app.use(
   express.json({
     limit: '15mb'
   })
+
+)
+// ==================================================
+// LOCAL WHATSAPP BRIDGE
+// ==================================================
+
+const whatsappBridgeApp = express()
+
+whatsappBridgeApp.use(cors())
+
+whatsappBridgeApp.use(
+  express.json({
+    limit: '1mb'
+  })
 )
 
+whatsappBridgeApp.get('/', (_req, res) => {
+
+  res.json({
+    success: true,
+    message: 'N2N WhatsApp Bridge is Running!'
+  })
+
+})
+
+whatsappBridgeApp.get('/status', (_req, res) => {
+
+  res.json({
+    success: true,
+    message: 'WhatsApp Bridge is running.'
+  })
+
+})
+
+
+whatsappBridgeApp.post('/send', async (req, res) => {
+  // Verify private bridge token before sending any message
+  const expectedToken = process.env.WHATSAPP_BRIDGE_TOKEN
+  const authorization = req.headers.authorization
+
+  if (!expectedToken) {
+    return res.status(503).json({
+      success: false,
+      message: 'WhatsApp bridge token is not configured.'
+    })
+  }
+
+  if (!authorization?.startsWith('Bearer ')) {
+    return res.status(401).json({
+      success: false,
+      message: 'Unauthorized.'
+    })
+  }
+
+  const providedToken = authorization.slice(7).trim()
+  const expectedBuffer = Buffer.from(expectedToken)
+  const providedBuffer = Buffer.from(providedToken)
+
+  if (
+    expectedBuffer.length !== providedBuffer.length ||
+    !crypto.timingSafeEqual(expectedBuffer, providedBuffer)
+  ) {
+    return res.status(401).json({
+      success: false,
+      message: 'Unauthorized.'
+    })
+  }
+
+  try {
+    const { phone, message } = req.body
+
+    if (!phone || !message) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone and message are required.'
+      })
+    }
+
+    console.log(`Bridge: Sending WhatsApp message to ${phone}...`)
+
+    const result = await sendWhatsAppMessage(
+      String(phone),
+      String(message)
+    )
+
+    if (!result) {
+      return res.status(500).json({
+        success: false,
+        message: 'WhatsApp message was not sent.'
+      })
+    }
+
+    console.log(`Bridge: WhatsApp message sent to ${phone} ✅`)
+
+    return res.json({
+      success: true,
+      message: 'WhatsApp message sent successfully.'
+    })
+  } catch (error) {
+    console.error('Bridge WhatsApp error:', error)
+
+    return res.status(500).json({
+      success: false,
+      message: 'WhatsApp bridge error.'
+    })
+  }
+})
+
+whatsappBridgeApp.listen(5050, () => {
+
+  console.log('')
+  console.log('======================================')
+  console.log('N2N WhatsApp Bridge')
+  console.log('======================================')
+  console.log(
+    'Bridge running on http://localhost:5050'
+  )
+  console.log('======================================')
+  console.log('')
+
+})
 // ==================================================
 // PRODUCT IMAGE FOLDER
 // ==================================================
@@ -2235,7 +2436,15 @@ app.get(
     // START WHATSAPP
     // ==================================================
 
-    whatsapp.startWhatsApp()
+    if (process.env.RENDER === 'true') {
+  return res.status(403).send(
+    'WhatsApp QR setup is only available locally.'
+  )
+}
+
+const whatsapp = await import('./whatsapp')
+
+whatsapp.startWhatsApp()
 
     // ==================================================
     // WAIT FOR QR
@@ -2391,15 +2600,11 @@ app.get(
 // START WHATSAPP AUTOMATICALLY
 // ==================================================
 
-setTimeout(
-  () => {
-
-    console.log(
-      'Starting WhatsApp automatically...'
-    )
-
-    whatsapp.startWhatsApp()
-
-  },
-  3000
-)
+if (process.env.RENDER !== 'true') {
+  setTimeout(() => {
+    console.log('Starting WhatsApp automatically...')
+    startWhatsApp()
+  }, 3000)
+} else {
+  console.log('Render detected. WhatsApp runs separately.')
+}

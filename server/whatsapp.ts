@@ -526,7 +526,12 @@ async function reconnectWhatsApp(): Promise<boolean> {
 // ==================================================
 
 export function startWhatsApp() {
-
+if (process.env.RENDER === 'true') {
+    console.log(
+      'Render detected. WhatsApp browser startup blocked.'
+    )
+    return
+  }
   if (
     isInitializing ||
     isReady
