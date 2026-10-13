@@ -1254,6 +1254,69 @@ app.post(
 // CUSTOMER + ADMIN PUBLIC READ ROUTE
 // ==================================================
 
+app.get('/api/excel-sync', async (req, res) => {
+  try {
+    const expectedKey = process.env.EXCEL_SYNC_KEY;
+    const providedKey = req.get('x-excel-sync-key');
+
+    if (!expectedKey) {
+      return res.status(503).json({
+        success: false,
+        message: 'Excel sync is not configured'
+      });
+    }
+
+    if (!providedKey || providedKey !== expectedKey) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    const [productRows] = await db.execute(`
+      SELECT name, price, category, unit, stock, image
+      FROM products
+      ORDER BY id ASC
+    `);
+
+    const [orderRows] = await db.execute(`
+      SELECT
+        order_number AS orderNumber,
+        UNIX_TIMESTAMP(created_at) * 1000 AS createdAt,
+        name AS customerName,
+        phone,
+        address,
+        city,
+        payment_method AS paymentMethod,
+        items,
+        total,
+        status,
+        locked
+      FROM orders
+      ORDER BY created_at DESC
+    `);
+
+    const orders = (orderRows as any[]).map((order) => ({
+      ...order,
+      items:
+        typeof order.items === 'string'
+          ? JSON.parse(order.items)
+          : order.items
+    }));
+
+    return res.json({
+      success: true,
+      products: productRows,
+      orders
+    });
+  } catch (error) {
+    console.error('Excel sync API error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Excel sync failed'
+    });
+  }
+});
 app.get(
   '/api/products',
   async (_req, res) => {
