@@ -1,36 +1,43 @@
 
-import 'dotenv/config';
-import * as XLSX from 'xlsx';
+import dotenv from 'dotenv';
+import XLSX from 'xlsx';
 import fs from 'node:fs';
-import path from 'node:path';
+
+dotenv.config({ path: 'D:/excel folder/.env.sync' });
 
 const API_URL = process.env.RENDER_API_URL;
 const SYNC_KEY = process.env.EXCEL_SYNC_KEY;
-const EXCEL_FILE = 'D:\\excel\\N2N-Grocery-Products-Template (1).xlsx';
+const EXCEL_FILE = 'D:\\excel folder\\N2N-Grocery-Products-Template (1).xlsx';
 const INTERVAL_MS = 5000;
 
 if (!API_URL || !SYNC_KEY) {
-  throw new Error('RENDER_API_URL ya EXCEL_SYNC_KEY missing hai.');
+  throw new Error(
+    'D:/excel/.env.sync mein RENDER_API_URL ya EXCEL_SYNC_KEY missing hai.'
+  );
 }
 
-async function syncExcel() {
+async function syncExcel(): Promise<void> {
   try {
-    const response = await fetch(`${API_URL}/api/excel-sync`, {
-      headers: { 'x-excel-sync-key': SYNC_KEY! }
+    if (!fs.existsSync(EXCEL_FILE)) {
+      throw new Error(`Excel file nahi mili: ${EXCEL_FILE}`);
+    }
+
+    const response: Response = await fetch(`${API_URL}/api/excel-sync`, {
+     headers: { 'x-excel-sync-key': SYNC_KEY! }
     });
 
+    console.log('API status:', response.status);
+
     if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${await response.text()}`);
+      throw new Error(
+        `API error: ${response.status} ${await response.text()}`
+      );
     }
 
     const data = await response.json() as {
       products: Record<string, unknown>[];
       orders: Record<string, unknown>[];
     };
-
-    if (!fs.existsSync(EXCEL_FILE)) {
-      throw new Error(`Excel file nahi mili: ${EXCEL_FILE}`);
-    }
 
     const workbook = XLSX.readFile(EXCEL_FILE);
 
@@ -43,28 +50,54 @@ async function syncExcel() {
       image: p.image ?? ''
     }));
 
+   
     const orderRows = data.orders.map((o) => ({
-      orderNumber: o.orderNumber ?? o.order_number ?? '',
-      date: o.createdAt ?? o.created_at ?? '',
-      customerName: o.customerName ?? o.customer_name ?? '',
-      phone: o.phone ?? o.customerPhone ?? o.customer_phone ?? '',
-      address: o.address ?? o.customerAddress ?? o.customer_address ?? '',
+      orderNumber: o.orderNumber ?? '',
+      date: o.createdAt
+        ? new Date(Number(o.createdAt)).toLocaleString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          })
+        : '',
+      customerName: o.customerName ?? '',
+      phone: o.phone ?? '',
+      address: o.address ?? '',
       city: o.city ?? '',
-      paymentMethod: o.paymentMethod ?? o.payment_method ?? '',
-      items: typeof o.items === 'string' ? o.items : JSON.stringify(o.items ?? []),
+      paymentMethod: o.paymentMethod ?? '',
       total: o.total ?? '',
       status: o.status ?? '',
       locked: o.locked ?? false
     }));
 
+    const orderDetailRows = data.orders.flatMap((o) => {
+      const items = Array.isArray(o.items) ? o.items as Record<string, unknown>[] : [];
+
+      return items.map((item) => ({
+        orderNumber: o.orderNumber ?? '',
+        customerName: o.customerName ?? '',
+        productName: item.name ?? item.id ?? '',
+        quantity: item.quantity ?? '',
+        unit: item.unit ?? '',
+        price: item.price ?? ''
+      }));
+    });
+
     workbook.Sheets['Products'] = XLSX.utils.json_to_sheet(productRows, {
       header: ['name', 'price', 'category', 'unit', 'stock', 'image']
     });
 
+    if (!workbook.SheetNames.includes('Products')) {
+      workbook.SheetNames.push('Products');
+    }
+
     workbook.Sheets['Orders'] = XLSX.utils.json_to_sheet(orderRows, {
       header: [
         'orderNumber', 'date', 'customerName', 'phone', 'address',
-        'city', 'paymentMethod', 'items', 'total', 'status', 'locked'
+        'city', 'paymentMethod', 'total', 'status', 'locked'
       ]
     });
 
@@ -72,7 +105,16 @@ async function syncExcel() {
       workbook.SheetNames.push('Orders');
     }
 
+    workbook.Sheets['Order Details'] = XLSX.utils.json_to_sheet(orderDetailRows, {
+      header: ['orderNumber', 'customerName', 'productName', 'quantity', 'unit', 'price']
+    });
+
+    if (!workbook.SheetNames.includes('Order Details')) {
+      workbook.SheetNames.push('Order Details');
+    }
+
     XLSX.writeFile(workbook, EXCEL_FILE);
+
     console.log(
       `${new Date().toLocaleTimeString()} — Products: ${productRows.length}, Orders: ${orderRows.length}`
     );
@@ -84,7 +126,10 @@ async function syncExcel() {
   }
 }
 
-console.log('N2N Excel sync start ho raha hai...');
-console.log(`Excel: ${path.resolve(EXCEL_FILE)}`);
+console.log('N2N Excel sync start ho raha hai.');
+console.log('Excel file:', EXCEL_FILE);
+
 await syncExcel();
-setInterval(syncExcel, INTERVAL_MS);
+setInterval(() => {
+  void syncExcel();
+}, INTERVAL_MS);

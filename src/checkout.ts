@@ -686,17 +686,14 @@ placeOrderButton.addEventListener(
                           item.id === id
                       )
 
-                    return {
-
-                      id,
-
-                      name:
-                        product?.name ||
-                        id,
-
-                      quantity
-
-                    }
+                    
+return {
+  id,
+  name: product?.name || id,
+  quantity,
+  unit: product?.unit || '',
+  price: product?.price ?? 0
+}
 
                   }
                 ),
