@@ -42,13 +42,14 @@ async function syncExcel(): Promise<void> {
     const workbook = XLSX.readFile(EXCEL_FILE);
 
     const productRows = data.products.map((p) => ({
-      name: p.name ?? '',
-      price: p.price ?? '',
-      category: p.category ?? '',
-      unit: p.unit ?? '',
-      stock: p.stock ?? '',
-      image: p.image ?? ''
-    }));
+  id: p.id ?? '',
+  name: p.name ?? '',
+  price: p.price ?? '',
+  category: p.category ?? '',
+  unit: p.unit ?? '',
+  stock: p.stock ?? '',
+  image: p.image ?? ''
+}));
 
    
     const orderRows = data.orders.map((o) => ({
@@ -86,9 +87,9 @@ async function syncExcel(): Promise<void> {
       }));
     });
 
-    workbook.Sheets['Products'] = XLSX.utils.json_to_sheet(productRows, {
-      header: ['name', 'price', 'category', 'unit', 'stock', 'image']
-    });
+   workbook.Sheets['Products'] = XLSX.utils.json_to_sheet(productRows, {
+  header: ['id', 'name', 'price', 'category', 'unit', 'stock', 'image']
+});
 
     if (!workbook.SheetNames.includes('Products')) {
       workbook.SheetNames.push('Products');

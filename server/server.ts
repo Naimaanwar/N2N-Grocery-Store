@@ -1274,7 +1274,7 @@ app.get('/api/excel-sync', async (req, res) => {
     }
 
     const [productRows] = await db.execute(`
-      SELECT name, price, category, unit, stock, image
+      SELECT id, name, price, category, unit, stock, image
       FROM products
       ORDER BY id ASC
     `);
